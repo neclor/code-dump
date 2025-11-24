@@ -48,26 +48,11 @@ def question4():
 def question5(M: int, N: int, i0: int, j0: int) -> list[tuple[int, int, int]]:
     height, width, row_0, column_0 = M, N, i0, j0
     check_bounds(height, width, row_0, column_0)
-
     solver: Glucose3 = Glucose3()
     add_constraints(solver, height, width)
-
-
-
-
-
-
     solver.add_clause([var_c(height, width, row_0, column_0, 0)])
-
-
-
-
-    constraints: list[tuple[int, int, int]] = [[1]]
-
-
-
+    constraints: list[tuple[int, int, int]] = [(1, 1, 1)]
     # YOUR CODE HERE
-
     return constraints
 
 
@@ -150,3 +135,61 @@ def check_bounds(height: int, width: int, row_0: int, column_0: int) -> None:
     if width <= 0: raise ValueError("Width must be positive.")
     if not (0 <= row_0 < height): raise ValueError("Starting row out of bounds.")
     if not (0 <= column_0 < width): raise ValueError("Starting column out of bounds.")
+
+
+
+
+class ChessBoard:
+    KNIGHT_MOVES: list[tuple[int, int]] = [(1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1), (-1, 2)]
+
+
+    def __init__(self, height: int, width: int, start_row: int, start_column: int) -> None:
+        if height <= 0: raise ValueError("Height must be positive.")
+        if width <= 0: raise ValueError("Width must be positive.")
+        if not (0 <= start_row < height): raise ValueError("Starting row out of bounds.")
+        if not (0 <= start_column < width): raise ValueError("Starting column out of bounds.")
+
+        self.height: int = height
+        self.width: int = width
+        self.start_row: int = start_row
+        self.start_column: int = start_column
+        self.cell_count: int = height * width
+        self.solver: Glucose3 = Glucose3()
+
+        self._add_constraints()
+
+
+    def _add_constraints(self) -> None:
+        for row in range(self.height):
+            for column in range(self.width):
+                self._cell_add_constraints(row, column)
+
+
+    def _cell_add_constraints(self, row: int, column: int) -> None:
+
+        if row == self.start_row and column == self.start_column:
+
+
+
+
+
+        pass
+
+
+
+
+
+
+    def _var_c(self, row: int, column: int, move: tuple[int, int]) -> int:
+        if not (0 <= row < self.height and 0 <= column < self.width): raise ValueError("Row or column out of bounds.")
+        return self._var_i(row * self.width + column, move)
+
+
+    def _var_i(self, index: int, move: tuple[int, int]) -> int:
+        if not (0 <= index < self.cell_count and move in self.KNIGHT_MOVES): raise ValueError("Index out of bounds or invalid move.")
+        return (len(self.KNIGHT_MOVES) + 1) * index + self.KNIGHT_MOVES.index(move) + 1
+
+
+    def _reverse_move(self, move: tuple[int, int]) -> tuple[int, int]:
+        if move not in self.KNIGHT_MOVES: raise ValueError("Invalid knight move.")
+        return (-move[0], -move[1])

@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="BookManager/BookManager.csproj" Id="37b58887-f9cc-4ccb-967b-c88cc70ca9c8" />
   <Project Path="JACounter/JACounter.csproj" Id="60cd07dd-1a7e-4362-84b9-42cea9807d5a" />
+  <Project Path="LC-3/LC-3.csproj" Id="eac082b6-e0b6-4867-8266-fc056bba9266" />
   <Project Path="MathLibrary/MathLibrary.csproj" Id="ff4b41ef-53f2-403f-99af-5acd16b6c608" />
   <Project Path="RollStat/RollStat.csproj" Id="af0c11dd-db93-441d-a7e4-a452f7d53501" />
   <Project Path="StorageManager/StorageManager.csproj" Id="2ebe121d-23b7-4233-9e9d-2257d63bbcbc" />

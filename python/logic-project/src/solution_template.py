@@ -41,7 +41,7 @@ def question4() -> int:
     def fliped_vertically(solution: list[list[int]]) -> list[list[int]]:
         new_solution: list[list[int]] = []
         for line in solution[::-1]:
-            new_solution.append(line[:])
+            new_solution.append(line.copy())
         return new_solution
 
 
@@ -80,21 +80,20 @@ def question5(M: int, N: int, i0: int, j0: int) -> list[tuple[int, int, int]]:
     height, width, start_row, start_column = M, N, i0, j0
 
     board: ChessBoard = ChessBoard(height, width, start_row, start_column)
-    solutions: list[list[tuple[int, int]]] = board.get_all_solutions()
+    if not board.solver.solve(): return []
 
-    if len(solutions) == 0: return []
+    constraints: list[tuple[int, int, int]] = [(turn, row, column) for turn, (row, column) in enumerate(board.get_random_solution()[1:], 1)]
+    assumptions: list[int] = [board.var_c(row, column, turn) for (turn, row, column) in constraints]
 
-    random_index: int = random.randrange(len(solutions))
-    main_solution: list[tuple[int, int]] = solutions[random_index]
-    del solutions[random_index]
+    model: list[int] | None = board.solver.get_model()
+    if model is None: return []
+    board.solver.add_clause([-var for var in model])
 
-    print(len(solutions))
+    for i in range(len(assumptions) - 1, -1, -1):
+        if not board.solver.solve(assumptions[:i] + assumptions[i + 1:]):
+            del constraints[i]
+            del assumptions[i]
 
-
-
-
-    constraints: list[tuple[int, int, int]] = [(1, 1, 1)]
-    # YOUR CODE HERE
     return constraints
 
 
@@ -132,29 +131,55 @@ class ChessBoard:
         self._add_constraints()
 
 
-    def get_solution(self) -> list[tuple[int, int]]:
-        if not self.solver.solve(): return []
+    def reset_solver(self) -> None:
+        if self.solver is not None: self.solver.delete()
+        self.solver = Glucose3()
+        self._add_constraints()
+
+
+    def get_solution(self, assumptions: list[int] = []) -> list[tuple[int, int]]:
+        if not self.solver.solve(assumptions): return []
+
         model: list[int] | None = self.solver.get_model()
         if model is None: return []
+
         return self._model_to_solution(model)
 
 
-    def get_all_solutions(self) -> list[list[tuple[int, int]]]:
+    def get_random_solution(self, assumptions: list[int] = []) -> list[tuple[int, int]]:
+        if not self.solver.solve(assumptions): return []
+
+        random_turns: list[int] = [i for i in range(1, self.cell_count)]
+        random.shuffle(random_turns)
+
+        for turn in random_turns:
+            random_indices: list[int] = [i for i in range(self._get_turn_var_count(turn))]
+            random.shuffle(random_indices)
+            for i in random_indices:
+                if self.solver.solve(assumptions + [self.var_i(i, turn)]):
+                    model: list[int] | None = self.solver.get_model()
+                    if model is None: continue
+                    return self._model_to_solution(model)
+
+        return []
+
+
+    def get_all_solutions(self, assumptions: list[int] = []) -> list[list[tuple[int, int]]]:
         solutions: list[list[tuple[int, int]]] = []
-        while self.solver.solve():
-            solutions.append(self.get_solution())
+        while self.solver.solve(assumptions):
             model: list[int] | None = self.solver.get_model()
             if model is None: break
+            solutions.append(self._model_to_solution(model))
             self.solver.add_clause([-var for var in model])
         return solutions
 
 
-    def get_matrix_solution(self) -> list[list[int]]:
-        return self._list_to_matrix(self.get_solution())
+    def get_matrix_solution(self, assumptions: list[int] = []) -> list[list[int]]:
+        return self._solution_to_matrix(self.get_solution(assumptions))
 
 
-    def get_all_matrix_solutions(self) -> list[list[list[int]]]:
-        return [self._list_to_matrix(solution) for solution in self.get_all_solutions()]
+    def get_all_matrix_solutions(self, assumptions: list[int] = []) -> list[list[list[int]]]:
+        return [self._solution_to_matrix(solution) for solution in self.get_all_solutions(assumptions)]
 
 
     def get_variables(self) -> list[int]:
@@ -253,7 +278,7 @@ class ChessBoard:
                         next_column: int = column + delta_column
                         if (
                             (not (0 <= next_row < self.height and 0 <= next_column < self.width)) or
-                            (next_row == self.start_row and next_column == self.start_column)
+                            self._is_start_cell(next_row, next_column)
                         ): continue
                         next_positions.append(self.var_c(next_row, next_column, turn + 1))
 
@@ -278,10 +303,10 @@ class ChessBoard:
         return solution
 
 
-    def _list_to_matrix(self, solution: list[tuple[int, int]]) -> list[list[int]]:
+    def _solution_to_matrix(self, solution: list[tuple[int, int]]) -> list[list[int]]:
         matrix_solution: list[list[int]] = [[-1 for _ in range(self.width)] for _ in range(self.height)]
-        for i, (row, column) in enumerate(solution):
-            matrix_solution[row][column] = i
+        for turn, (row, column) in enumerate(solution):
+            matrix_solution[row][column] = turn
         return matrix_solution
 
 
@@ -295,6 +320,8 @@ def main() -> None:
 
     execution_time = end_time - start_time
     print(f"{execution_time:.4f}s")
+
+    q5_test()
 
 
 def var_test() -> None:
@@ -316,5 +343,20 @@ def var_test() -> None:
         for line in matrix:
             print(line)
         print()
+
+
+def q5_test() -> None:
+    board: ChessBoard = ChessBoard(3, 4, 1, 3)
+    print(f"all: {len(board.get_all_solutions())}")
+    board.reset_solver()
+    print(f"(7, 2, 3): {len(board.get_all_solutions([board.var_c(2, 3, 7)]))}")
+    board.reset_solver()
+    print(f"(1, 2, 1), (7, 1, 0): {len(board.get_all_solutions([board.var_c(2, 1, 1), board.var_c(1, 0, 7)]))}")
+    board.reset_solver()
+    print(f"(1, 2, 1): {len(board.get_all_solutions([board.var_c(2, 1, 1)]))}")
+    board.reset_solver()
+    print(f"(7, 1, 0): {len(board.get_all_solutions([board.var_c(1, 0, 7)]))}")
+    board.reset_solver()
+
 
 if __name__ == '__main__': main()

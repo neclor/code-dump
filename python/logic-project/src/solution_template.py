@@ -321,7 +321,7 @@ def main() -> None:
     execution_time = end_time - start_time
     print(f"{execution_time:.4f}s")
 
-    q5_test()
+    #q5_test()
 
 
 def var_test() -> None:

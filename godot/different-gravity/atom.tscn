@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://b8na8gsaw2v4t"]
+
+[ext_resource type="Script" uid="uid://bqgkbc2112k7r" path="res://atom.gd" id="1_gdw2q"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_to43q"]
+
+[node name="Atom" type="RigidBody2D"]
+script = ExtResource("1_gdw2q")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_to43q")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(0.2509804, 0.5019608, 0, 1)
+polygon = PackedVector2Array(0, -10, 7, -7, 10, 0, 7, 7, 0, 10, -7, 7, -10, 0, -7, -7)

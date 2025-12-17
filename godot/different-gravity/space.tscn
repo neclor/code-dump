@@ -1,0 +1,60 @@
+[gd_scene load_steps=3 format=3 uid="uid://cwa70opek4aac"]
+
+[ext_resource type="Script" uid="uid://bw5ptnh2v5vky" path="res://space.gd" id="1_d5lh8"]
+[ext_resource type="PackedScene" uid="uid://b8na8gsaw2v4t" path="res://atom.tscn" id="2_81phd"]
+
+[node name="Space" type="Node2D"]
+script = ExtResource("1_d5lh8")
+
+[node name="Atom2" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(26, 0)
+
+[node name="Atom" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(13, -24)
+
+[node name="Atom3" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(-12, -26)
+
+[node name="Atom4" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(-28, -5)
+
+[node name="Atom5" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(-23, 22)
+
+[node name="Atom6" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(0, 29)
+
+[node name="Atom7" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(19, 25)
+
+[node name="Atom8" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(2, -50)
+
+[node name="Atom9" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(28, -42)
+
+[node name="Atom10" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(47, -23)
+
+[node name="Atom11" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(50, 4)
+
+[node name="Atom12" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(43, 35)
+
+[node name="Atom13" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(13, 47)
+
+[node name="Atom14" parent="." instance=ExtResource("2_81phd")]
+
+[node name="Atom15" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(-19, 43)
+
+[node name="Atom16" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(-51, 13)
+
+[node name="Atom17" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(-50, -27)
+
+[node name="Atom18" parent="." instance=ExtResource("2_81phd")]
+position = Vector2(-30, -46)

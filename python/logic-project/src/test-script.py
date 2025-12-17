@@ -1,4 +1,4 @@
-import solution_template as st
+import knight_cycle as st
 
 # Necessary for visualization only
 import matplotlib.pylab as pl
@@ -28,21 +28,21 @@ def plot_solution(solution):
 if __name__ == '__main__':
 
 	# Question 1
-	plot_solution(st.question1(5, 5, 0, 0)[0]) # there should be a solution
-	plot_solution(st.question1(3, 7, 0, 0)[0]) # there should be a solution
-	plot_solution(st.question1(7, 5, 3, 1)[0]) # there should be a solution
-	plot_solution(st.question1(4, 4, 0, 0)[0]) # there should not be a solution
+	plot_solution(st.knight_cycle(5, 5, 0, 0)) # there should be a solution
+	plot_solution(st.knight_cycle(3, 7, 0, 0)) # there should be a solution
+	plot_solution(st.knight_cycle(7, 5, 3, 1)) # there should be a solution
+	plot_solution(st.knight_cycle(4, 4, 0, 0)) # there should not be a solution
 
 	# Question 2
-	plot_solution(st.question1(8, 8, 0, 0)[0])
+	plot_solution(st.knight_cycle(8, 8, 0, 0))
 
 	# Question 3
-	print("Number of solutions for a 3x4 chessboard: " + str(st.question3()))
+	#print("Number of solutions for a 3x4 chessboard: " + str(st.question3()))
 
 	# Question 4
-	print("Number of solutions for a 3x4 chessboard, up to symmetry: " + str(st.question4()))
+	#print("Number of solutions for a 3x4 chessboard, up to symmetry: " + str(st.question4()))
 
 	# Question 5
-	print(st.question5(4, 4, 0, 0)) # should be the empty list
-	print(st.question5(3, 4, 1, 3))
-	print(st.question5(3, 4, 1, 3)) # should not systematically give the same result as the previous call
+	#print(st.question5(4, 4, 0, 0)) # should be the empty list
+	#print(st.question5(3, 4, 1, 3))
+	#print(st.question5(3, 4, 1, 3)) # should not systematically give the same result as the previous call

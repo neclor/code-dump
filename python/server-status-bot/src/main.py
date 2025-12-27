@@ -1,25 +1,26 @@
 import asyncio
 import logging
 
-import config as Config
-import bot.bot as Bot
+from configs import log_config
+from server_bot.server_bot import ServerBot
 
 
 logging.basicConfig(
     level=logging.WARNING,
-    format=Config.LOG_FORMAT,
-    datefmt=Config.DATE_FORMAT,
-    handlers=[logging.FileHandler(Config.LOG_PATH), logging.StreamHandler()]
+    format=log_config.LOG_FORMAT,
+    datefmt=log_config.DATE_FORMAT,
+    handlers=[logging.FileHandler(log_config.LOG_PATH), logging.StreamHandler()]
 )
 logger: logging.Logger = logging.getLogger(__name__)
 
 
 def main() -> None:
-    logger.info("Start...")
+    logger.info("Start")
 
     loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
 
-    Bot.init(loop)
+    bot: ServerBot = ServerBot()
+    bot.start()
 
     loop.run_forever()
 

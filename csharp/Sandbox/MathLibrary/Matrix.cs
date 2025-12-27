@@ -1,9 +1,7 @@
 using System.Numerics;
 using System.Text;
 
-
 namespace MathLibrary;
-
 
 public readonly struct Matrix<T> : IEquatable<Matrix<T>> where T : INumber<T> { // IEnumerable<T>,
 

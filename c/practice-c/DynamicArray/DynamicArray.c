@@ -129,7 +129,7 @@ static void quickSort(DynamicArray* dynamicArray, ptrdiff_t lowIndex, ptrdiff_t 
 			indexLowElement++;
 		}
 	}
-	swapElements(&array[indexLowElement], &array[pivotIndex]);
+	swapElements(&array[indexLowElement], &array[highIndex]);
 	quickSort(dynamicArray, lowIndex, indexLowElement - 1);
 	quickSort(dynamicArray, indexLowElement + 1, highIndex);
 }

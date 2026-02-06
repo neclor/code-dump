@@ -118,20 +118,20 @@ void DynamicArrayBSort(DynamicArray* dynamicArray) {
 }
 
 static void quickSort(DynamicArray* dynamicArray, ptrdiff_t lowIndex, ptrdiff_t highIndex) {
-    int* array = dynamicArray->array;
-    if (lowIndex < highIndex) {
-        ptrdiff_t indexLowElement = lowIndex;
-        size_t pivotIndex = highIndex;
-        for (ptrdiff_t i = lowIndex; i < highIndex; i++) {
-            if (array[i] < array[pivotIndex]) {
-                swapElements(&array[i], &array[indexLowElement]);
-                indexLowElement++;
-            }
-        }
-        swapElements(&array[indexLowElement], &array[pivotIndex]);
-        quickSort(dynamicArray, lowIndex, indexLowElement - 1);
-        quickSort(dynamicArray, indexLowElement + 1, highIndex);
-    } 
+    if (lowIndex >= highIndex) return;
+	
+	int* array = dynamicArray->array;
+	int pivotValue = array[highIndex];
+	ptrdiff_t indexLowElement = lowIndex;
+	for (ptrdiff_t i = lowIndex; i < highIndex; i++) {
+		if (array[i] < pivotValue) {
+			swapElements(&array[i], &array[indexLowElement]);
+			indexLowElement++;
+		}
+	}
+	swapElements(&array[indexLowElement], &array[pivotIndex]);
+	quickSort(dynamicArray, lowIndex, indexLowElement - 1);
+	quickSort(dynamicArray, indexLowElement + 1, highIndex);
 }
 
 void DynamicArrayQSort(DynamicArray* dynamicArray) {

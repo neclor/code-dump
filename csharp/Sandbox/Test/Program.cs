@@ -11,7 +11,19 @@ internal class Program {
 		InverseTest();
 		PLUDecompositionTest();
 		LinearSolverTest();
+
+
+		bool a = true;
+		bool b = true;
+		bool c = a && b || a;
+
+		_ = Foo();
+
+		bool abc = c;
 	}
+
+
+	private static int Foo() => 42;
 
 	private static void DeterminantTest() {
 		Matrix<float> matrix = new(4, 4, [

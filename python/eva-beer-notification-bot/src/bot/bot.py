@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from telethon import TelegramClient
+from telethon import TelegramClient, Button
 from telethon.events import NewMessage
 
 from modules import storage
@@ -17,13 +17,12 @@ logger: logging.Logger = logging.getLogger(__name__)
 class Bot:
     def __init__(self) -> None:
         self.COMMANDS: dict[str, object] = {
-            r"(?i)^(/day)$": self._status,
-            r"(?i)^(/timezone)$": self._timezone,
-            r"(?i)^(/subscribe)$": self._subscribe,
-            r"(?i)^(/unsubscribe)$": self._unsubscribe,
-            r"(?i)^(/clean)$": self._clean,
+            r"(?i)^(/start)$": self._start,
+            #r"(?i)^(/picture)$": self._picture,
+            #r"(?i)^(/subscribe)$": self._subscribe,
+            #r"(?i)^(/unsubscribe)$": self._unsubscribe,
+            #r"(?i)^(/timezone)$": self._timezone,
             r"(?i)^(/help)$": self._help,
-            r"(?i)^(/version)$": self._version,
         }
         self.ADMIN_COMMANDS: dict[str, object] = {
             r"(?i)^(/logs)$": self._logs,
@@ -31,13 +30,14 @@ class Bot:
             r"(?i)^(/restart)$": self._restart,
         }
 
-        self._users: dict[str, int] = storage.load_users()
+        self._users: dict[str, tuple[bool, int]] = storage.load_users()
 
         self._client: TelegramClient = TelegramClient(api_keys.BOT_SESSION_NAME, api_keys.API_ID, api_keys.API_HASH).start(bot_token=api_keys.BOT_TOKEN)
-        self._status_message_ids: dict[int | str, int] = {}
+        self._picture_message_ids: dict[int | str, int] = {}
         self._message_ids: dict[int | str, set[int]] = {}
 
         self._is_running = False
+        self._time_settings_changed: asyncio.Event = asyncio.Event()
 
         for pattern, function in self.COMMANDS.items():
             self._client.on(NewMessage(pattern=pattern))(function)
@@ -45,11 +45,11 @@ class Bot:
             self._client.on(NewMessage(from_users=api_keys.ADMIN_IDS, pattern=pattern))(function)
 
 
-    def start(self) -> None:
+    def start_bot(self) -> None:
         self._is_running = True
         loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
         loop.create_task(self._connect())
-        loop.create_task(self._autoupdate_status())
+        #loop.create_task(self._autosend())
 
 
     async def _connect(self) -> None:
@@ -64,9 +64,20 @@ class Bot:
             await asyncio.sleep(bot_config.CONNECTION_RETRY_DEALY)
 
 
-    async def _autoupdate_status(self) -> None:
-        await asyncio.sleep(bot_config.STATUS_UPDATE_START_DELAY)
+    async def _autosend(self) -> None:
         while self._is_running:
+
+
+
+
+
+
+
+
+
+
+
+
             if not self._client.is_connected():
                 await asyncio.sleep(1)
                 continue
@@ -79,6 +90,32 @@ class Bot:
 
 
 #region Commands
+
+
+    async def _start(self, event: NewMessage.Event) -> None:
+        if (chat_id := event.chat_id) is None: return
+
+
+
+
+        keyboard = [
+            [Button.text('Поздравь меня с Днём Пива!')],
+            [Button.text('Какое пиво мне выпить сегодня?')],
+            [Button.text('Расскажи мне плохой пивной анекдот!')],
+            [Button.text('Прочитай мне тост!')]
+        ]
+
+
+        await event.respond(
+            'Выберите действие:',
+            buttons=keyboard,
+        )
+
+
+        pass
+
+
+
 
     async def _status(self, event: NewMessage.Event) -> None:
         if (chat_id := event.chat_id) is None: return
@@ -122,10 +159,6 @@ class Bot:
 """
         )
 
-
-    async def _version(self, event: NewMessage.Event) -> None:
-        self._auto_delete_command_async(event)
-        await self._safe_respond_auto_delete(event, "Server Monitor Bot v3.0.0 neclor")
 #endregion
 
 
@@ -153,13 +186,18 @@ class Bot:
 
 
     async def _restart(self, event: NewMessage.Event) -> None:
-        await self._stop_auto_delete(event)
+        await self._stop_with_auto_delete(event)
         logger.info("Restart")
         asyncio.get_event_loop().stop()
 #endregion
 
 
-    async def _stop_auto_delete(self, event: NewMessage.Event) -> None:
+
+
+
+
+
+    async def _stop_with_auto_delete(self, event: NewMessage.Event) -> None:
         self._is_running = False
         tasks: list = [self._delete_status_messages()]
         if bot_config.AUTO_DELETE_COMMANDS: tasks.append(mu.safe_delete_event(event))

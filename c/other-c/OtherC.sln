@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.11.35208.52
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11612.153
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HanoiTower", "HanoiTower\HanoiTower.vcxproj", "{415C14E0-D07C-4A09-B6EE-5611DEB00248}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleNum", "SimpleNum\SimpleNum.vcxproj", "{CE697FC0-97C9-43A7-BFB8-6C3B9912FCED}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ExerciceComplProg", "ExerciceComplProg\ExerciceComplProg.vcxproj", "{56FEF43C-2C57-41CE-B296-5A286D674AFE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Sandbox\Sandbox.vcxproj", "{AC9FC79E-549B-4324-BCCD-122C4F17092B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +73,14 @@ Global
 		{56FEF43C-2C57-41CE-B296-5A286D674AFE}.Release|x64.Build.0 = Release|x64
 		{56FEF43C-2C57-41CE-B296-5A286D674AFE}.Release|x86.ActiveCfg = Release|Win32
 		{56FEF43C-2C57-41CE-B296-5A286D674AFE}.Release|x86.Build.0 = Release|Win32
+		{AC9FC79E-549B-4324-BCCD-122C4F17092B}.Debug|x64.ActiveCfg = Debug|x64
+		{AC9FC79E-549B-4324-BCCD-122C4F17092B}.Debug|x64.Build.0 = Debug|x64
+		{AC9FC79E-549B-4324-BCCD-122C4F17092B}.Debug|x86.ActiveCfg = Debug|Win32
+		{AC9FC79E-549B-4324-BCCD-122C4F17092B}.Debug|x86.Build.0 = Debug|Win32
+		{AC9FC79E-549B-4324-BCCD-122C4F17092B}.Release|x64.ActiveCfg = Release|x64
+		{AC9FC79E-549B-4324-BCCD-122C4F17092B}.Release|x64.Build.0 = Release|x64
+		{AC9FC79E-549B-4324-BCCD-122C4F17092B}.Release|x86.ActiveCfg = Release|Win32
+		{AC9FC79E-549B-4324-BCCD-122C4F17092B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

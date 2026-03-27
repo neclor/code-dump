@@ -1,0 +1,13 @@
+{
+  "TmuxAuthSessionName": "wow-auth",
+  "TmuxWorldSessionName": "wow-world",
+
+  "WinePrefix": "/home/neclor/servers/wow/wine",
+
+  "AuthExe": "authserver.exe",
+  "WorldExe": "worldserver.exe",
+  "WorkingDirectory": "/home/neclor/servers/wow/azc-wotlk",
+
+  "WorldShutdownDelay": 10,
+  "WorldIdleShutdownTimeout": 30
+}

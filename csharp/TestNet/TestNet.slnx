@@ -1,5 +1,0 @@
-<Solution>
-  <Project Path="Client/Client.csproj" />
-  <Project Path="Dns/Dns.csproj" Id="fc4a258c-0933-4767-b5f9-9db597dc5b3c" />
-  <Project Path="Server/Server.csproj" />
-</Solution>

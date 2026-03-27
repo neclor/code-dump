@@ -1,0 +1,6 @@
+@WowServer_HostAddress = http://localhost:5062
+
+GET {{WowServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

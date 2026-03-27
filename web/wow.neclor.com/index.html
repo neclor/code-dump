@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Control Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>WoW Server Manager</h1>
+
+            <div class="status-grid">
+                <div class="status-item">
+                    <span class="label">Auth Server:</span>
+                    <span id="authStatus" class="value status-off">OFFLINE</span>
+                </div>
+                <div class="status-item">
+                    <span class="label">World Server:</span>
+                    <span id="worldStatus" class="value status-off">OFFLINE</span>
+                </div>
+                <div class="status-item">
+                    <span class="label">Online Players:</span>
+                    <span id="onlineCount" class="value">0</span>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button id="startBtn" disabled onclick="handleStart()">START SERVER</button>
+                <p>(After start, wait 3 min for the server to load)</p>
+            </div>
+
+            <p id="systemMessage" class="message"></p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

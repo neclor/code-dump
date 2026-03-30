@@ -87,3 +87,44 @@ button {
   font-size: 0.9rem;
   min-height: 1.2rem;
 }
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.input-group input {
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #444;
+    background: #222;
+    color: white;
+}
+
+#createAccBtn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+
+#createAccBtn:hover {
+    background-color: #218838;
+}
+
+.reg-message {
+    font-size: 14px;
+    margin-top: 10px;
+    transition: color 0.2s ease;
+}
+
+.msg-info { color: #ffffff; }
+.msg-error { color: #ff4d4d; } 
+.msg-success { color: #28a745; }
+.msg-warning { color: #ffc107; }
+
+.status-on { color: #28a745; font-weight: bold; }
+.status-off { color: #ff4d4d; font-weight: bold; }

@@ -12,51 +12,61 @@ public class WowServerManager(ServerConfig config) {
 
 	public async Task StartAllAsync() {
 		await _lock.WaitAsync();
-		try {
-			List<Task> tasks = [];
 
-			if (!await IsAuthRunningAsync()) {
-				tasks.Add(StartServiceAsync(Config.TmuxAuthSessionName, Config.AuthExe));
-			}
-			if (!await IsWorldRunningAsync()) {
-				tasks.Add(StartServiceAsync(Config.TmuxWorldSessionName, Config.WorldExe));
-			}
-
-			await Task.WhenAll(tasks);
-
-		} finally {
-			_ = _lock.Release();
+		List<Task> tasks = [];
+		if (!await IsAuthRunningAsync()) {
+			tasks.Add(StartServiceAsync(Config.TmuxAuthSessionName, Config.AuthExe));
 		}
+		if (!await IsWorldRunningAsync()) {
+			tasks.Add(StartServiceAsync(Config.TmuxWorldSessionName, Config.WorldExe));
+		}
+		await Task.WhenAll(tasks);
+
+		_ = _lock.Release();
 	}
 
 	public async Task StopAllAsync() {
 		await _lock.WaitAsync();
-		try {
-			List<Task> tasks = [];
 
-			if (await IsAuthRunningAsync()) {
-				tasks.Add(Tmux.ExecuteCommandAsync($"send-keys -t {Config.TmuxAuthSessionName} C-c"));
-			}
-			if (await IsWorldRunningAsync()) {
-				tasks.Add(Tmux.ExecuteCommandAsync($"send-keys -t {Config.TmuxWorldSessionName} \"server shutdown {Config.WorldShutdownDelay}\" C-m"));
-			}
+		List<Task> tasks = [];
 
-			await Task.WhenAll(tasks);
-
-			for (int i = 0; i < 600; i++) {
-				if (!await IsAuthRunningAsync() && !await IsWorldRunningAsync()) break;
-				await Task.Delay(TimeSpan.FromSeconds(1));
-			}
-
-			List<Task> killTasks = [
-				Tmux.KillSessionAsync(Config.TmuxAuthSessionName),
-				Tmux.KillSessionAsync(Config.TmuxWorldSessionName)
-			];
-			await Task.WhenAll(killTasks);
-
-		} finally {
-			_ = _lock.Release();
+		if (await IsAuthRunningAsync()) {
+			tasks.Add(Tmux.ExecuteCommandAsync($"send-keys -t {Config.TmuxAuthSessionName} C-c"));
 		}
+		if (await IsWorldRunningAsync()) {
+			tasks.Add(Tmux.ExecuteCommandAsync($"send-keys -t {Config.TmuxWorldSessionName} \"server shutdown {Config.WorldShutdownDelay}\" C-m"));
+		}
+
+		await Task.WhenAll(tasks);
+
+		for (int i = 0; i < 600; i++) {
+			if (!await IsAuthRunningAsync() && !await IsWorldRunningAsync()) break;
+			await Task.Delay(TimeSpan.FromSeconds(1));
+		}
+
+		List<Task> killTasks = [
+			Tmux.KillSessionAsync(Config.TmuxAuthSessionName),
+			Tmux.KillSessionAsync(Config.TmuxWorldSessionName)
+		];
+		await Task.WhenAll(killTasks);
+
+		_ = _lock.Release();
+	}
+
+	public async Task<bool> CreateAccount(string name, string password) {
+		if (!await IsWorldRunningAsync() || !await IsAuthRunningAsync()) return false;
+
+		await _lock.WaitAsync();
+
+		_ = await Tmux.ExecuteCommandAsync($"send-keys -t {Config.TmuxWorldSessionName} \"account create {name} {password}\" C-m");
+		await Task.Delay(500);
+		string text = await Tmux.GetLastLinesAsync(Config.TmuxWorldSessionName, 2);
+
+		_ = _lock.Release();
+
+		Match match = Regex.Match(text, @"Account(?:\s+.*?)?\s+created");
+
+		return match.Success;
 	}
 
 	public async Task<bool> IsAuthRunningAsync() {
@@ -92,22 +102,15 @@ public class WowServerManager(ServerConfig config) {
 	public async Task<int> GetOnlineCountAsync() {
 		if (!await IsWorldRunningAsync()) return 0;
 
+		await _lock.WaitAsync();
+
 		_ = await Tmux.ExecuteCommandAsync($"send-keys -t {Config.TmuxWorldSessionName} \"server info\" C-m");
-		await Task.Delay(200);
+		await Task.Delay(500);
 
-		using Process? process = Process.Start(new ProcessStartInfo {
-			FileName = "tmux",
-			Arguments = $"capture-pane -pt {Config.TmuxWorldSessionName} -S -10",
-			RedirectStandardOutput = true,
-			UseShellExecute = false,
-			CreateNoWindow = true
-		});
-		if (process is null) return -1;
+		string text = await Tmux.GetLastLinesAsync(Config.TmuxWorldSessionName, 10);
+		Match match = Regex.Match(text, @"Connected players:\s+(\d+)");
 
-		string output = await process.StandardOutput.ReadToEndAsync();
-		await process.WaitForExitAsync();
-
-		Match match = Regex.Match(output, @"Connected players: (\d+)");
+		_ = _lock.Release();
 
 		if (match.Success && int.TryParse(match.Groups[1].Value, out int count)) {
 			return count;

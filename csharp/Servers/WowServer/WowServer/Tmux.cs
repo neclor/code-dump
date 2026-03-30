@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace WowServer;
 
@@ -28,4 +29,24 @@ public static class Tmux {
 	public static async Task<bool> HasSessionAsync(string sessionName) => await ExecuteCommandAsync($"has-session -t {sessionName}", silent: true);
 
 	public static async Task<bool> KillSessionAsync(string sessionName) => await ExecuteCommandAsync($"kill-session -t {sessionName}", silent: true);
+
+	public static async Task<string> GetLastLinesAsync(string sessionName, int lineCount) {
+		using Process? process = Process.Start(new ProcessStartInfo {
+			FileName = "tmux",
+			Arguments = $"capture-pane -pt {sessionName}",
+			RedirectStandardOutput = true,
+			UseShellExecute = false,
+			CreateNoWindow = true
+		});
+		if (process is null) return "";
+
+		string output = await process.StandardOutput.ReadToEndAsync();
+		await process.WaitForExitAsync();
+
+		IEnumerable<string> lastLines = output.Split('\n')
+			.Where(line => !string.IsNullOrWhiteSpace(line))
+			.TakeLast(lineCount);
+
+		return string.Join(Environment.NewLine, lastLines);
+	}
 }

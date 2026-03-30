@@ -9,8 +9,17 @@ const UI = {
     worldStatus: document.getElementById('worldStatus'),
     onlineCount: document.getElementById('onlineCount'),
     startBtn: document.getElementById('startBtn'),
-    systemMessage: document.getElementById('systemMessage')
+    systemMessage: document.getElementById('systemMessage'),
+    regUsername: document.getElementById('regUsername'),
+    regPassword: document.getElementById('regPassword'),
+    regMessage: document.getElementById('regMessage')
 };
+
+function setRegMessage(text, type = 'info') {
+    if (!UI.regMessage) return;
+    UI.regMessage.innerText = text;
+    UI.regMessage.className = `reg-message msg-${type}`;
+}
 
 function updateStatusIndicator(element, isActive) {
     if (!element) return;
@@ -21,15 +30,11 @@ function updateStatusIndicator(element, isActive) {
 async function fetchStatus() {
     try {
         const response = await fetch(CONFIG.API_URL);
-        
-        if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
         const data = await response.json();
         renderUI(data);
         UI.systemMessage.innerText = '';
-
     } catch (error) {
         console.error('Status check failed:', error);
         handleConnectionError();
@@ -39,21 +44,20 @@ async function fetchStatus() {
 function renderUI(data) {
     const isAuthOnline = !!data.auth;
     const isWorldOnline = !!data.world;
-    const bothServersRunning = isAuthOnline || isWorldOnline;
+    
+    const anyServerRunning = isAuthOnline || isWorldOnline;
 
     updateStatusIndicator(UI.authStatus, isAuthOnline);
     updateStatusIndicator(UI.worldStatus, isWorldOnline);
-    
     UI.onlineCount.innerText = Math.max(0, data.online || 0);
 
-    UI.startBtn.disabled = bothServersRunning;
+    UI.startBtn.disabled = anyServerRunning;
 }
 
 function handleConnectionError() {
     UI.systemMessage.innerText = 'Connection to API lost';
     updateStatusIndicator(UI.authStatus, false);
     updateStatusIndicator(UI.worldStatus, false);
-    
     UI.startBtn.disabled = true;
 }
 
@@ -62,7 +66,7 @@ async function handleStart() {
     UI.systemMessage.innerText = 'Starting servers...';
 
     try {
-        const response = await fetch(CONFIG.API_URL, { method: 'POST' });
+        const response = await fetch(`${CONFIG.API_URL}/start`, { method: 'POST' });
         
         if (response.ok) {
             UI.systemMessage.innerText = 'Start command sent successfully.';
@@ -78,7 +82,42 @@ async function handleStart() {
     setTimeout(fetchStatus, CONFIG.RETRY_DELAY);
 }
 
+async function handleCreateAccount() {
+    const name = UI.regUsername.value.trim();
+    const password = UI.regPassword.value.trim();
+
+    if (!name || !password) {
+        setRegMessage('Fill in all fields!', 'error');
+        return;
+    }
+
+    setRegMessage('Creating account...', 'info');
+
+    try {
+        const url = `${CONFIG.API_URL}/account/create?name=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}`;
+        const response = await fetch(url, { method: 'POST' });
+
+        if (response.ok) {
+            const result = await response.json();
+            
+            if (result.created) {
+                setRegMessage('Account created successfully!', 'success');
+                UI.regUsername.value = '';
+                UI.regPassword.value = '';
+            } else {
+                setRegMessage('Failed: Account already exists or server issue.', 'warning');
+            }
+        } else {
+            const errorText = await response.text();
+            setRegMessage(`Server Error: ${response.status}`, 'error');
+        }
+    } catch (error) {
+        setRegMessage('Connection error. Is API running?', 'error');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     fetchStatus();
     setInterval(fetchStatus, CONFIG.REFRESH_INTERVAL);
+    if (UI.startBtn) UI.startBtn.onclick = handleStart;
 });

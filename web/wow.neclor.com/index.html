@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Server Control Panel</title>
+    <title>Wow Server Manager</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -32,6 +32,19 @@
             </div>
 
             <p id="systemMessage" class="message"></p>
+
+            <hr>
+
+            <div class="registration-section">
+                <h3>Create Account</h3>
+                <div class="input-group">
+                    <input type="text" id="regUsername" placeholder="Username" autocomplete="off">
+                    <input type="password" id="regPassword" placeholder="Password">
+                    <button id="createAccBtn" onclick="handleCreateAccount()">CREATE ACCOUNT</button>
+                </div>
+                <p id="regMessage" class="message"></p>
+            </div>
+
         </div>
     </div>
     <script src="script.js"></script>

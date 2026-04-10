@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="BagTest/BagTest.csproj" Id="c68103b8-6d69-4968-8c65-667b054d8656" />
   <Project Path="BookManager/BookManager.csproj" Id="37b58887-f9cc-4ccb-967b-c88cc70ca9c8" />
   <Project Path="JACounter/JACounter.csproj" Id="60cd07dd-1a7e-4362-84b9-42cea9807d5a" />
   <Project Path="LC-3/LC-3.csproj" Id="eac082b6-e0b6-4867-8266-fc056bba9266" />

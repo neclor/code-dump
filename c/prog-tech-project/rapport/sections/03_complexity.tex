@@ -1,0 +1,72 @@
+\section{Complexity Analysis}
+
+$N$ \- number of files,
+$S$ \- size of a file in bytes,
+$d$ \- number of distinct file sizes,
+$f$ \- number of files sharing a given size,
+$h$ \- number of files sharing the same size and hash.
+
+\subsection{Time Complexity of FDCheck}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Case} & \textbf{Average} & \textbf{Worst case} \\
+\midrule
+New size (no collision)     & $O(1)$         & $O(d)$ \\
+Same size, different hash   & $O(S)$         & $O(S + f)$ \\
+Same size, same hash        & $O(S \cdot h)$ & $O(S \cdot h + f)$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{New size}: In the average case this is $O(1)$. The worst case $O(d)$ occurs
+when the size table's hashmap triggers a reallocation and rehash of all $d$ existing elements.
+
+\textbf{Same size, different hash}: Computing the hash, cost $O(S)$. The hash resolves to a new place in the
+content hashmap. The worst case $O(f)$ for a possible reallocation of the hashmap.
+
+\textbf{Same size, same hash}: the content hash collides
+with $h$ existing entries. Each requires a byte-by-byte file comparison, $O(S \cdot h)$.
+The worst case adds $O(f)$ for reallocation.
+
+\textbf{Overall worst case:} if all files have the same size and their hashes collide,
+the total cost for $N$ files is $O(N^2 \cdot S)$.
+
+\subsection{Other Operations}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Operation} & \textbf{Average} & \textbf{Worst case} \\
+\midrule
+\texttt{FDInit}  & $O(1)$ & $O(1)$ \\
+\texttt{FDFree}  & $O(N)$ & $O(N)$ \\
+\texttt{FDDump}  & $O(N)$ & $O(N)$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Space Complexity}
+
+The ADT stores $O(N)$ path copies and hashmap entries. Peak heap usage is $O(N \cdot L)$,
+where $L$ is the average path length.
+
+% \subsection{Underlying Structures}
+%
+% \begin{table}[h]
+% \centering
+% \begin{tabular}{lll}
+% \toprule
+% \textbf{Operation} & \textbf{Average} & \textbf{Worst case} \\
+% \midrule
+% \textbf{Hashmap} \texttt{insert/lookup/remove}       & $O(1)$ & $O(n)$ \\
+% \textbf{Hashmap} \texttt{reserve/defragment}         & $O(n)$ & $O(n)$ \\
+% \textbf{Vector} \texttt{push\_back}                  & $O(1)$ & $O(n)$ \\
+% \textbf{Vector} \texttt{at/set}                      & $O(1)$ & $O(1)$ \\
+% \textbf{Vector} \texttt{insert/remove\_at}           & $O(n)$ & $O(n)$ \\
+% \bottomrule
+% \end{tabular}
+% \end{table}

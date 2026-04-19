@@ -1,0 +1,25 @@
+\section{ADT Design}
+
+\subsection{First Level: Size Table}
+
+The core structure is a \textbf{Hashmap} keyed by file size (\texttt{long}).
+Each value in this hashmap is a pointer to a \textbf{FilePaths} structure, which groups
+files that share the same size.
+
+\subsection{Second Level: FilePaths}
+
+\texttt{FilePaths} manages files of the same size:
+\begin{itemize}
+    \item \textbf{Single file}: when only one file has been registered for a given size,
+          the structure stores just its path pointer. No hashing or comparison is needed.
+    \item \textbf{Several files}: upon receiving a second file of the same size, the structure
+          transitions to a hashmap keyed by file hash (via tabulation hashing).
+          Each value in this hashmap is a is a pointer to a \textbf{Hashset} of path strings that share
+          both the same size and the same content.
+\end{itemize}
+
+\subsection{Structures}
+
+The \textbf{Hashmap}, \textbf{Hashset}, and \textbf{Vector} are generic collections.
+The hashmap stores key--value pairs in a \textbf{Vector},
+with a separate index table to entry indices.

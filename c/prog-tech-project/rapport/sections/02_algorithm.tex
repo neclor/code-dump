@@ -1,0 +1,22 @@
+\section{Algorithms}
+
+\subsection{FDCheck: Adding a File}
+
+When a file is added, its size is computed (\texttt{file\_size}) and used as the key to store the file in a \textbf{Hashmap}.
+If another file with the same size is added, a new \textbf{Hashmap} is created that indexes files by their content.
+For each file, a hash is computed (\texttt{file\_hash\_by\_path\_ptr}) and used for fast lookup in the table;
+in case of hash collisions, a byte-by-byte comparison of the files is performed (\texttt{file\_equal\_by\_path\_ptr}).
+The value in this map is a \textbf{Hashset} that stores file paths,
+also using a hash (\texttt{string\_hash\_by\_ptr}) derived from the string
+and performing string comparison (\texttt{string\_equal\_by\_ptr}) when necessary.
+
+
+\subsection{Tabulation Hashing}
+
+Files and strings are hashed using tabulation hashing with a table of $32 \times 256$ random 64-bit (\texttt{size\_t}) values.
+The table is initialized once on the first call to the hash function.
+
+\subsection{FDDump: Retrieving Results}
+
+To obtain the results, we iterate over all hashmaps and compute the total number of entries.
+Then we allocate a table of the required size and iterate again to populate it.

@@ -1,0 +1,192 @@
+\section{Analyse de complexité}
+\subsubsection{Notation}
+Soit:
+\begin{itemize}
+    \item $N$: nombre total de termes,
+    \item $m$: nombre de termes correspondant au préfixe de la requête,
+    \item $k$: nombre de résultats à afficher.
+\end{itemize}
+
+\subsection{Approche 1: Recherche linéaire}
+Chaque requête parcourt l’ensemble des $N$ termes pour sélectionner ceux correspondant au préfixe,
+puis conserve les $k$ meilleurs selon leur poids.
+
+\subsubsection{Complexité en temps}
+\textbf{Meilleur cas:}
+\[
+O(N)
+\]
+Même dans le meilleur cas, tous les termes doivent être examinés.
+
+\textbf{Pire cas:}
+\[
+O(N)
+\]
+Le filtrage est toujours linéaire.
+
+\subsubsection{Complexité totale}
+\[
+O(N)
+\]
+
+\subsubsection{Complexité en espace}
+\[
+O(1)
+\]
+
+\subsection{Approche 2: Tri lexicographique + recherche binaire + tri des résultats}
+\begin{itemize}
+    \item Les termes sont triés lexicographiquement.
+    \item Une recherche binaire permet d'identifier les $m$ termes correspondant au préfixe.
+    \item Les $m$ termes sont ensuite triés par poids pour sélectionner les $k$ meilleurs.
+\end{itemize}
+
+\subsubsection{Complexité en temps}
+
+\textbf{Tri initial:}
+\begin{itemize}
+    \item MergeSort: $O(N \log N)$
+    \item QuickSort:
+    \begin{itemize}
+        \item Meilleur cas: $O(N \log N)$
+        \item Pire cas: $O(N^2)$
+    \end{itemize}
+\end{itemize}
+
+\textbf{Recherche binaire:}
+\[
+O(\log N)
+\]
+Recherchons 2 éléments extrêmes
+
+\textbf{Extraction des $m$ éléments:}
+\[
+O(m)
+\]
+
+\textbf{Tri des $m$ éléments par poids:}
+\begin{itemize}
+    \item MergeSort: $O(m \log m)$
+    \item QuickSort:
+    \begin{itemize}
+        \item Meilleur cas: $O(m \log m)$
+        \item Pire cas: $O(m^2)$
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Complexité totale}
+
+\textbf{Avec MergeSort:}
+\[
+O(N \log N + m \log m)
+\]
+
+\textbf{Avec QuickSort:}
+\begin{itemize}
+    \item Meilleur cas:
+    \[
+    O(N \log N + m \log m)
+    \]
+    \item Pire cas:
+    \[
+    O(N^2 + m^2)
+    \]
+\end{itemize}
+
+\subsubsection{Complexité en espace}
+\begin{itemize}
+    \item MergeSort: $O(N)$
+    \item QuickSort:
+    \begin{itemize}
+        \item Meilleur cas: $O(\log N)$
+        \item Pire cas: $O(N)$
+    \end{itemize}
+\end{itemize}
+
+Stockage supplémentaire pour les résultats:
+\[
+O(m)
+\]
+
+\begin{itemize}
+    \item MergeSort: $O(m)$
+    \item QuickSort:
+    \begin{itemize}
+        \item Meilleur cas: $O(\log m)$
+        \item Pire cas: $O(m)$
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Complexité totale}
+\[
+O(N)
+\]
+
+\subsection{Approche 3: Tri lexicographique + recherche binaire + tas binaire}
+\begin{itemize}
+    \item Les termes sont triés lexicographiquement.
+    \item Une recherche binaire identifie les $m$ termes du préfixe.
+    \item Une structure de tas binaire (heap) est utilisée pour sélectionner les $k$ meilleurs selon leur poids.
+\end{itemize}
+
+\subsubsection{Complexité en temps}
+
+\textbf{Tri initial:}
+\begin{itemize}
+    \item MergeSort: $O(N \log N)$
+    \item QuickSort:
+    \begin{itemize}
+        \item Meilleur cas: $O(N \log N)$
+        \item Pire cas: $O(N^2)$
+    \end{itemize}
+\end{itemize}
+
+\textbf{Recherche binaire:}
+\[
+O(\log N)
+\]
+Recherchons 2 éléments extrêmes.
+
+\textbf{Parcours des $m$ éléments avec tas de taille $\min(k, m)$:}
+\[
+O(m \log \min(k, m))
+\]
+
+\subsubsection{Complexité totale}
+
+\textbf{Avec MergeSort:}
+\[
+O(N \log N + m \log \min(k, m))
+\]
+
+\textbf{Avec QuickSort:}
+\begin{itemize}
+    \item Meilleur cas:
+    \[
+    O(N \log N + m \log \min(k, m))
+    \]
+    \item Pire cas:
+    \[
+    O(N^2 +m \log \min(k, m))
+    \]
+\end{itemize}
+
+\subsubsection{Complexité en espace}
+\begin{itemize}
+    \item MergeSort: $O(N)$
+    \item QuickSort:
+    \begin{itemize}
+        \item Meilleur cas: $O(\log N)$
+        \item Pire cas: $O(N)$
+    \end{itemize}
+\end{itemize}
+
+Espace supplémentaire pour le tas:
+\[
+O(\min(k, m))
+\]
+
+\subsubsection{Complexité totale}
+\[
+O(N)
+\]

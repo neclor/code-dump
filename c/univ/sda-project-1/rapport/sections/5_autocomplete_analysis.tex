@@ -1,0 +1,17 @@
+\section{Discussion des résultats}
+
+Les graphiques montrent qu'à partir de $l \geq 2$,
+les différences entre les approches deviennent faibles.
+
+La longueur du préfixe $l$ influence directement le temps d'exécution.
+Quand le préfixe est court, beaucoup de termes correspondent à la requête,
+ce qui augmente le nombre d'éléments à traiter et donc le coût du tri selon le poids.
+À l'inverse, lorsque le préfixe est plus long,
+la recherche binaire permet d'éliminer plus de termes dès le début,
+ce qui réduit le nombre de candidats $m$ et accélère le traitement.
+
+Ainsi, quand $l$ augmente,
+les performances s'améliorent car il y a moins de données à parcourir ou à trier.
+
+Les graphiques confirment que le paramètre $m$ est le facteur principal de la complexité temporelle.
+On observe que le temps d'exécution diminue nettement quand $l$ augmente, ce qui réduit $m$.

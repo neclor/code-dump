@@ -1,0 +1,24 @@
+\section{Analyse empirique de tri}
+Nous rapportons les temps de calcul pour les algorithmes
+QuickSort (QS) et MergeSort (MS) sur les trois fichiers de données.
+Chaque fichier a été trié selon deux critères: l'ordre lexicographique и l'ordre par poids.
+
+\begin{table}[h!]
+    \centering
+    \caption{Temps de calcul des algorithmes de tri (en secondes)}
+
+    \begin{tabular}{@{}llcc@{}}
+        \toprule
+            Fichier & Critère & QuickSort (s) & MergeSort (s) \\
+        \midrule
+            actors\_25k.txt   & Lexicographique & 0.007394 & 0.007174 \\
+            actors\_25k.txt   & Poids           & 0.001915 & 0.002683 \\
+        \midrule
+            actors\_250k.txt  & Lexicographique & 0.113568 & 0.123857 \\
+            actors\_250k.txt  & Poids           & 0.050852 & 0.031511 \\
+        \midrule
+            actors\_2500k.txt & Lexicographique & 2.071485 & 2.505856 \\
+            actors\_2500k.txt & Poids           & 1.412158 & 0.401059 \\
+        \bottomrule
+    \end{tabular}
+\end{table}

@@ -9,7 +9,7 @@ insert_final_newline = true
 [*.md]
 trim_trailing_whitespace = false
 
-[*.vhd]
+[*.{vhd,vhdl}]
 indent_style = tab
 indent_size = 4
 tab_width = 4

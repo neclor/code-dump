@@ -1,0 +1,41 @@
+{% extends "layouts/base.html" %}
+{% from "includes/th_sort.html" import th_sort %}
+
+{% block title %}Locations - Wendys{% endblock %}
+
+{% block content %}
+<h1>Locations</h1>
+
+{% include "includes/filter_bar.html" with context %}
+
+{% if locations is defined %}
+<table>
+  <thead>
+    <tr>
+      {{ th_sort('id',          'Id') }}
+      {{ th_sort('street',      'Street') }}
+      {{ th_sort('city',        'City') }}
+      {{ th_sort('postal_code', 'Postal code') }}
+      {{ th_sort('country',     'Country') }}
+      {{ th_sort('comment',     'Comment') }}
+    </tr>
+  </thead>
+  <tbody>
+    {% for location in locations %}
+    <tr>
+      <td>{{ location.id }}</td>
+      <td>{{ location.street }}</td>
+      <td>{{ location.city }}</td>
+      <td>{{ location.postal_code or '-' }}</td>
+      <td>{{ location.country }}</td>
+      <td>{{ location.comment or '-' }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="6" class="td-empty">No results</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

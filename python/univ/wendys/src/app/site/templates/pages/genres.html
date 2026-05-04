@@ -1,0 +1,41 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Genres - Wendys{% endblock %}
+
+{% block content %}
+<h1>Genre Taxonomy</h1>
+
+{% if error %}
+<div class="error">{{ error }}</div>
+{% endif %}
+
+<form method="POST">
+  <textarea name="text" rows="8" placeholder="subgenre, genre&#10;subgenre, genre&#10;subgenre, genre&#10;"></textarea>
+  <br/>
+  <input type="submit" value="Submit" class="btn btn-primary">
+</form>
+
+<h2>Genres</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Genre</th>
+      <th>Subgenres</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for g in genres %}
+    <tr>
+      <td>{{ g.genre }}</td>
+      <td>{{ g.subgenres or '-' }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="2" class="td-empty">No results</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

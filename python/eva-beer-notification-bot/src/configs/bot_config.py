@@ -1,8 +1,0 @@
-AUTO_DELETE_COMMANDS: bool = True
-AUTO_DELETE_MESSAGES: bool = True
-MESSAGE_LIFETIME: int = 60
-
-CONNECTION_RETRY_DEALY: int = 60
-MESSAGE_SIZE_LIMIT: int = 2048
-
-USERS_PATH: str = "data/users.json"

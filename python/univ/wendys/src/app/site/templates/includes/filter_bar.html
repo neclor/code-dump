@@ -1,0 +1,35 @@
+{% if filters is defined %}
+
+<form method="GET" action="{{ request.path }}" class="filter-bar">
+  {% for f in filters %}
+  <div class="form-group">
+    <label for="filter-{{ f.name }}">{{ f.label }}</label>
+    {% if f.type == 'select' %}
+    <select id="filter-{{ f.name }}" name="{{ f.name }}">
+      <option value="">All</option>
+      {% for opt in f.options %}
+      <option value="{{ opt.value }}" {% if request.args.get(f.name) == opt.value %}selected{% endif %}>{{ opt.label }}</option>
+      {% endfor %}
+    </select>
+    {% else %}
+    <input
+      id="filter-{{ f.name }}"
+      type="{{ f.type }}"
+      name="{{ f.name }}"
+      value="{{ request.args.get(f.name, '') }}"
+      placeholder="{% if f.type == 'text' %}contains...{% endif %}"
+    >
+    {% endif %}
+  </div>
+  {% endfor %}
+  <div class="form-group" style="flex-direction: row; align-items: center;">
+    <button type="submit">Search</button>
+    {% set args = request.args.to_dict() %}
+    {% for f in filters %}
+      {% set _ = args.pop(f.name, None) %}
+    {% endfor %}
+    <a href="?{{ args | urlencode }}" class="btn btn-secondary">Clear filters</a>
+  </div>
+</form>
+
+{% endif %}

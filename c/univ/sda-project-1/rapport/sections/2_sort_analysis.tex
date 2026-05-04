@@ -1,0 +1,21 @@
+\section{Analyse et choix de l'algorithme}
+
+\subsection{Résultats et complexité}
+Les tests confirment la complexité théorique en O(NlogN).
+Quand on multiplie la taille des données par 10,
+le temps de calcul augmente de façon cohérente (environ 15 à 20 fois).
+
+On note cependant que sur 2,5 millions de lignes,
+le MergeSort est 3,5 fois plus rapide que le QuickSort (0,40s contre 1,41s).
+Cela s'explique par la sensibilité du QuickSort au choix du pivot dans une liste déjà triée,
+alors que le MergeSort reste stable et constant peu importe l'ordre des données.
+
+\subsection{Algorithme approprié}
+Le tri fusion (MergeSort) est préféré.
+
+Même si le QuickSort est un peu plus rapide,
+le MergeSort garantit une performance stable en O(NlogN) dans tous les cas.
+Nos tests prouvent que le MergeSort est plus performant sur de gros volumes de données déjà triées.
+
+Il faut noter que les performances du tri rapide dépendent du choix du pivot.
+Avec un autre pivot(nous avons utilisé l'élément le plus à droite), il peut être plus efficace.

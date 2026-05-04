@@ -1,0 +1,42 @@
+{% extends "layouts/base.html" %}
+{% from "includes/th_sort.html" import th_sort %}
+
+{% block title %}CD Statistics - Wendys{% endblock %}
+
+{% block content %}
+<h1>CD Statistics</h1>
+
+<table>
+  <thead>
+    <tr>
+      {{ th_sort("cd_number",        "CD #") }}
+      {{ th_sort("total_duration",   "Total") }}
+      {{ th_sort("min_duration",     "Min") }}
+      {{ th_sort("max_duration",     "Max") }}
+      {{ th_sort("average_duration", "Average") }}
+      {{ th_sort("playlist_count",   "Playlists") }}
+      {{ th_sort("genres",           "Genres") }}
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in stats %}
+    <tr>
+      <td>{{ s.cd_number }}</td>
+      <td>{{ s.total_duration }}</td>
+      <td>{{ s.min_duration }}</td>
+      <td>{{ s.max_duration }}</td>
+      <td>{{ s.average_duration }}</td>
+      <td>{{ s.playlist_count }}</td>
+      <td>{{ s.genres or '-' }}</td>
+      <td><a href="{{ url_for('cds.cd_edit', cd_number=s.cd_number) }}" class="btn btn-secondary">Edit</a></td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="8" class="td-empty">No results</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

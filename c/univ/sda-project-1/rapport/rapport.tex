@@ -1,0 +1,40 @@
+% !TEX root = ./rapport.tex
+% !TEX engine = latexmk -pdf
+% !TEX buildOnSave = true
+\documentclass[a4paper, 11pt, oneside]{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian,french]{babel}
+\usepackage{pgfplots}
+
+\pgfplotsset{compat=1.18}
+
+% pdflatex rapport.tex
+
+\title{SDA Project 1: AutoComplete}
+\author{Pavlov Aleksandr s2400691 \\ Kostenko Oleksandr s2508297}
+\date{}
+
+\begin{document}
+    \maketitle
+    \newpage
+    \tableofcontents
+    \newpage
+
+    \input{sections/0_introduction}
+
+    \input{sections/1_sort_experiments}
+    \input{sections/2_sort_analysis}
+    \input{sections/3_theoretical}
+    \input{sections/4_autocomplete_experiments}
+    \input{sections/5_autocomplete_analysis}
+
+    \input{sections/6_conclusion}
+
+\end{document}

@@ -1,0 +1,40 @@
+{% extends "layouts/base.html" %}
+{% from "includes/th_sort.html" import th_sort %}
+
+{% block title %}Events Dashboard - Wendys{% endblock %}
+
+{% block content %}
+<h1>Events Dashboard</h1>
+
+<table>
+  <thead>
+    <tr>
+      {{ th_sort("id",         "Id") }}
+      {{ th_sort("name",       "Name") }}
+      {{ th_sort("date",       "Date") }}
+      {{ th_sort("status",     "Status") }}
+      {{ th_sort("nb_request", "Requests") }}
+      {{ th_sort("cost",       "Cost") }}
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for event in events %}
+    <tr>
+      <td>{{ event.id }}</td>
+      <td>{{ event.name }}</td>
+      <td>{{ event.date.strftime('%d/%m/%Y') }}</td>
+      <td><span class="badge badge-{{ event.status | lower }}">{{ event.status }}</span></td>
+      <td>{{ event.nb_request }}</td>
+      <td>{{ event.cost }}</td>
+      <td><a href="{{ url_for('events.edit', event_id=event.id) }}" class="btn btn-secondary">Edit</a></td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="7" class="td-empty">No results</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

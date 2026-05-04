@@ -1,0 +1,85 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ "Edit Event #" ~ event.id if event else "New Event" }} - Wendys{% endblock %}
+
+{% block content %}
+<h1>{{ "Edit Event #" ~ event.id if event else "New Event" }}</h1>
+
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+
+<form id="save-form" method="POST" action="{{ url_for('events.edit', event_id=event.id) if event else url_for('events.edit') }}" class="form-card">
+  <div class="form-row">
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" value="{{ event.name if event else '' }}" required>
+    </div>
+    <div class="form-group">
+      <label for="date">Date</label>
+      <input type="date" id="date" name="date" value="{{ event.date if event else '' }}" required>
+    </div>
+    <div class="form-group">
+      <label for="theme">Theme</label>
+      <input type="text" id="theme" name="theme" value="{{ event.theme if event else '' }}" required>
+    </div>
+    <div class="form-group">
+      <label for="type">Type</label>
+      <input type="text" id="type" name="type" value="{{ event.type if event else '' }}" required>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="3">{{ event.description or '' if event else '' }}</textarea>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="client">Client id</label>
+      <input type="number" id="client" name="client" value="{{ event.client if event else '' }}" required>
+    </div>
+    <div class="form-group">
+      <label for="manager">Manager id</label>
+      <input type="number" id="manager" name="manager" value="{{ event.manager or '' if event else '' }}">
+    </div>
+    <div class="form-group">
+      <label for="event_planner">Planner id</label>
+      <input type="number" id="event_planner" name="event_planner" value="{{ event.event_planner or '' if event else '' }}">
+    </div>
+    <div class="form-group">
+      <label for="dj">DJ id</label>
+      <input type="number" id="dj" name="dj" value="{{ event.dj or '' if event else '' }}">
+    </div>
+    <div class="form-group">
+      <label for="location">Location id</label>
+      <input type="number" id="location" name="location" value="{{ event.location or '' if event else '' }}">
+    </div>
+    <div class="form-group">
+      <label for="rental_fee">Rental fee</label>
+      <input type="number" id="rental_fee" name="rental_fee" step="0.01" value="{{ event.rental_fee or '' if event else '' }}">
+    </div>
+    <div class="form-group">
+      <label for="playlist">Playlist</label>
+      <input type="text" id="playlist" name="playlist" value="{{ event.playlist or '' if event else '' }}">
+    </div>
+  </div>
+</form>
+
+{% if event %}
+<form id="delete-form" method="POST" action="{{ url_for('events.delete', event_id=event.id) }}"></form>
+{% endif %}
+
+<div class="form-row">
+  <button type="submit" form="save-form">Save</button>
+
+  <a href="{{ url_for('events.events') }}" class="btn btn-secondary">Cancel</a>
+
+  {% if event %}
+  <button type="submit" form="delete-form" class="btn btn-danger">Delete</button>
+  {% endif %}
+</div>
+
+{% endblock %}

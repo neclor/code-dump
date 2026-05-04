@@ -1,10 +1,10 @@
-/* Quartus Prime Version 25.1std.0 Build 1129 10/21/2025 SC Lite Edition */
+/* Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition */
 JedecChain;
 	FileRevision(JESD32A);
 	DefaultMfr(6E);
 
 	P ActionCode(Cfg)
-		Device PartName(EP4CE6E22) Path("C:/Git/code-dumb/fpga/sea-battle/output_files/") File("sea_battle.sof") MfrSpec(OpMask(1));
+		Device PartName(5M160ZE64) Path("C:/Git/projet-digital-electronic/output_files/") File("sea_battle.pof") MfrSpec(OpMask(1) SEC_Device(5M160ZE64) Child_OpMask(2 1 1));
 
 ChainEnd;
 

@@ -1,0 +1,69 @@
+Nous utilisons des vues dans le base de donnée, afin de simplifier l'accès aux données complexes.
+Pour la taxonomie des genres, nous nous basons sur une vue récursive qui nous permet pour chaque genre, d'avoir l'ensemble des sous genre de celui-ci.
+\begin{lstlisting}[language=SQL, title={specializes\_transitive\_closure}]
+CREATE VIEW specializes_transitive_closure AS
+    WITH RECURSIVE specializes_transitive(genre, subgenre) AS (
+        SELECT genre, subgenre FROM specializes
+        UNION ALL
+        SELECT st.genre, s.subgenre
+        FROM specializes_transitive st, specializes s
+        WHERE st.subgenre = s.genre
+    )
+    SELECT * FROM specializes_transitive;
+\end{lstlisting}
+
+Pour les statistiques sur les CDs, nous calculons d'abord des statistiques avec des fonctions utilitaires simples, puis pour les genres,
+nous faisons l'union entre les genres présents sur les chansons du CD et tous les sous-genres de ces genres la, en utilisant la vue précédente.
+\begin{lstlisting}[language=SQL, title={cd\_statistics}]
+DROP VIEW IF EXISTS cd_statistics;
+CREATE VIEW cd_statistics AS
+    SELECT
+        cd.cd_number,
+        cd_get_total_song_duration(cd.cd_number) AS total_duration,
+        cd_get_min_song_duration(cd.cd_number) AS min_duration,
+        cd_get_max_song_duration(cd.cd_number) AS max_duration,
+        cd_get_average_song_duration(cd.cd_number) AS average_duration,
+        cd_playlist_count(cd.cd_number) AS playlist_count,
+        (
+            SELECT GROUP_CONCAT(all_genres.genre ORDER BY all_genres.genre SEPARATOR ', ')
+            FROM (
+                SELECT song.genre
+                FROM song
+                WHERE song.cd_number = cd.cd_number
+                UNION
+                SELECT stc.genre
+                FROM song
+                JOIN specializes_transitive_closure stc ON stc.subgenre = song.genre
+                WHERE song.cd_number = cd.cd_number
+            ) AS all_genres
+        ) AS genres
+    FROM cd;
+\end{lstlisting}
+
+Pour le dashboard des CDs, nous commençons par générer toutes les dates entre le tout premier et le tout dernier événement. Ensuite pour chaque
+élément du produit cartésien de ces dates et des CD, on calcule le nombre de fois que ce CD est utilisé ce jour la.
+Notons que si il y a un grand écart entre les deux dates et que la base de donnée contient beaucoup de CDS,
+le produit cartésien générera une très grande quantité de tuples.
+\begin{lstlisting}[language=SQL, title={cd\_dashboard}]
+CREATE VIEW cd_dashboard AS
+    WITH RECURSIVE dates(date) AS (
+        SELECT MIN(date) AS date FROM event
+        UNION ALL
+        SELECT DATE_ADD(date, INTERVAL 1 DAY)
+        FROM dates
+        WHERE date < (SELECT MAX(date) FROM event)
+    )
+    SELECT
+        dates.date,
+        cd.cd_number,
+        cd.copies,
+        (
+            SELECT COUNT(DISTINCT event.id)
+            FROM event
+            JOIN contains ON event.playlist = contains.playlist
+            WHERE contains.cd_number = cd.cd_number AND event.date = dates.date
+        ) AS copies_used
+    FROM dates
+    CROSS JOIN cd;
+\end{lstlisting}
+

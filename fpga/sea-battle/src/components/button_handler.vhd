@@ -1,50 +1,47 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use work.my_std.all;
+use work.boolean_vector_pkg.all;
 
 
 entity button_handler is
 	generic(
-		CLK_FREQ: positive := 320; -- Hz
-		SCAN_PERIOD: natural := 100; -- ms
-		BUTTON_COUNT: positive := 1
+		CLK_FREQ : positive := 320; -- Hz
+		PERIOD : natural := 32; -- ms
+		BUTTON_MAX : positive := 1
 	);
 	port(
-		clk: in std_logic;
+		clk : in std_logic;
 
-		i_buttons: in std_logic_vector(0 to BUTTON_COUNT - 1);
-		o_buttons: out boolean_vector(0 to BUTTON_COUNT - 1)
+		i_buttons : in std_logic_vector(0 to BUTTON_MAX - 1);
+		o_buttons : out boolean_vector(0 to BUTTON_MAX - 1)
 	);
 end entity;
 
 
 architecture behavioral of button_handler is
-	signal buttons_old: boolean_vector(0 to BUTTON_COUNT - 1) := (others => true);
+	constant BUTTON_PRESSED : std_logic := '0';
+    constant BUTTON_RELEASED : std_logic := '1';
 
-	signal tick: boolean := false;
+	constant TICKS: natural := CLK_FREQ * PERIOD / 1000 ;
+	signal tick_count: natural range 0 to TICKS := 0;
+
+	signal buttons_old : std_logic_vector(0 to BUTTON_MAX - 1) := (others => BUTTON_RELEASED);
 begin
 
-	u_blinker: entity work.blinker
-	generic map (
-		CLK_FREQ => CLK_FREQ,
-		PERIOD => SCAN_PERIOD
-	)
-	port map (
-		clk => clk,
-		tick => tick
-	);
-
-	main: process(clk)
+	main : process(clk)
 	begin
 		if rising_edge(clk) then
 			o_buttons <= (others => false);
-			if tick then
-				for i in 0 to BUTTON_COUNT - 1 loop
-					if i_buttons(i) = '0' and buttons_old(i) then
-						o_buttons(i) <= true;
-					end if;
+
+			if tick_count < TICKS then
+				tick_count <= tick_count + 1;
+			else
+				tick_count <= 0;
+
+				for i in i_buttons'range loop
+					o_buttons(i) <= (i_buttons(i) = BUTTON_PRESSED) and (buttons_old(i) = BUTTON_RELEASED);
 				end loop;
-				buttons_old <= to_boolean_vector(i_buttons);
+				buttons_old <= i_buttons;
 			end if;
 		end if;
 	end process;

@@ -1,0 +1,59 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Edit Song - Wendys{% endblock %}
+
+{% block content %}
+<h1>Edit Song</h1>
+
+{% if error %}
+<p class="error">{{ error }}</p>
+{% endif %}
+
+<form id="save-form" method="POST" action="{{ request.path }}" class="form-card">
+  <div class="form-row">
+    <div class="form-group">
+      <label>CD</label>
+      <input type="number" value="{{ cd_number }}" disabled>
+    </div>
+    <div class="form-group">
+      <label for="track_number">Track</label>
+      <input type="number" id="track_number" name="track_number" value="{{ track_number }}" min="1" required>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input type="text" id="title" name="title" value="{{ song.title if song else '' }}" required>
+    </div>
+    <div class="form-group">
+      <label for="artist">Artist</label>
+      <input type="text" id="artist" name="artist" value="{{ song.artist if song else '' }}" required>
+    </div>
+    <div class="form-group">
+      <label for="duration">Duration</label>
+      <input type="time" id="duration" name="duration" step="1" value="{{ song.duration if song else '' }}" required>
+    </div>
+    <div class="form-group">
+      <label for="genre">Genre</label>
+      <input type="text" id="genre" name="genre" value="{{ song.genre if song else '' }}" required>
+    </div>
+  </div>
+</form>
+
+{% if song %}
+<form id="delete-form" method="POST" action="{{ url_for('cds.song_delete', cd_number=cd_number, track_number=track_number) }}"></form>
+{% endif %}
+
+<div class="form-row">
+  <button type="submit" form="save-form">Save</button>
+
+  <a href="{{ url_for('cds.cd_edit', cd_number=cd_number) }}" class="btn btn-secondary">Cancel</a>
+
+  {% if song %}
+  <button type="submit" form="delete-form" class="btn btn-danger">Delete</button>
+  {% endif %}
+</div>
+
+
+{% endblock %}

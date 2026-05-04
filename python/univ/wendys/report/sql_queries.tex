@@ -1,0 +1,21 @@
+Pour savoir si une playlist est disponible, nous commençons par vérifier qu'elle existe, et puis pour chaque CD,
+on compte le nombre de fois qu'il est utilisé dans un autre événement à la même date. Si ce nombre est supérieur au nombre de copies du CD,
+la playlist n'est pas disponible.
+\begin{lstlisting}[language=SQL, title={Requête de vérification de disponibilité de playlist}]
+SELECT (
+    SELECT COUNT(*) FROM playlist WHERE name = :playlist_name
+) = 1
+AND (
+    SELECT COUNT(*) = 0
+    FROM contains c JOIN cd USING (cd_number)
+    WHERE c.playlist = :playlist_name
+    AND (
+        SELECT COUNT(*) FROM event e
+        JOIN contains c2 ON c2.playlist = e.playlist
+                        AND c2.cd_number = c.cd_number
+        WHERE e.date = :date_event AND e.id != :id_actuel
+    ) >= cd.copies
+) AS is_available;
+\end{lstlisting}
+
+

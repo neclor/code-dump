@@ -1,0 +1,34 @@
+{% extends "layouts/base.html" %}
+{% from "includes/th_sort.html" import th_sort %}
+
+{% block title %}CD Availability - Wendys{% endblock %}
+
+{% block content %}
+<h1>CD Availability</h1>
+
+<table>
+  <thead>
+    <tr>
+      {{ th_sort("date",        "Date") }}
+      {{ th_sort("cd_number",   "CD #") }}
+      {{ th_sort("copies",      "Copies") }}
+      {{ th_sort("copies_used", "Used") }}
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in cds %}
+    <tr>
+      <td>{{ row.date.strftime('%d/%m/%Y') if row.date else '-' }}</td>
+      <td>{{ row.cd_number }}</td>
+      <td>{{ row.copies }}</td>
+      <td>{{ row.copies_used }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="4" class="td-empty">No results</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

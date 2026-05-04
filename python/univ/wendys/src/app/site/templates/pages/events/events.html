@@ -1,0 +1,57 @@
+{% extends "layouts/base.html" %}
+{% from "includes/th_sort.html" import th_sort %}
+
+{% block title %}Events - Wendys{% endblock %}
+
+{% block content %}
+<h1>Events</h1>
+
+{% include "includes/filter_bar.html" with context %}
+
+{% if events is defined %}
+
+<table>
+  <thead>
+    <tr>
+      {{ th_sort('id',            'Id') }}
+      {{ th_sort('name',          'Name') }}
+      {{ th_sort('date',          'Date') }}
+      {{ th_sort('client',        'Client') }}
+      {{ th_sort('theme',         'Theme') }}
+      {{ th_sort('type',          'Type') }}
+      {{ th_sort('manager',       'Manager') }}
+      {{ th_sort('event_planner', 'Planner') }}
+      {{ th_sort('dj',            'DJ') }}
+      {{ th_sort('location',      'Location') }}
+      {{ th_sort('rental_fee',    'Rental fee') }}
+      {{ th_sort('playlist',      'Playlist') }}
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for event in events %}
+    <tr>
+      <td>{{ event.id }}</td>
+      <td>{{ event.name }}</td>
+      <td>{{ event.date.strftime('%d/%m/%Y') }}</td>
+      <td>{{ event.client}}</td>
+      <td>{{ event.theme }}</td>
+      <td>{{ event.type }}</td>
+      <td>{{ event.manager or '-' }}</td>
+      <td>{{ event.event_planner or '-' }}</td>
+      <td>{{ event.dj or '-' }}</td>
+      <td>{{ event.location or '-' }}</td>
+      <td>{{ event.rental_fee or '-' }}</td>
+      <td>{{ event.playlist or '-' }}</td>
+      <td><a href="{{ url_for('events.edit', event_id=event.id) }}" class="btn btn-secondary">Edit</a></td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="13" class="td-empty">No results</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endif %}
+{% endblock %}

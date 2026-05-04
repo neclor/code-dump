@@ -1,0 +1,14 @@
+\section{Conclusion}
+
+Parmi les approches étudiées,
+l'utilisation d'une file de priorité (PQ) combinée à une recherche par préfixe est la plus efficace pour traiter les requêtes.
+
+Les méthodes basées sur le tri sont moins performantes,
+car elles nécessitent de trier l'ensemble des mots correspondants,
+ce qui entraîne un coût plus élevé.
+
+L'approche avec une file de priorité permet de sélectionner les meilleurs
+éléments sans effectuer un tri complet. Elle traite les résultats en $O(m \log \min(k, m))$,
+ce qui évite de trier les $m$ éléments.
+Cette méthode est particulièrement adaptée au contexte où le nombre de résultats à afficher $k$
+est généralement bien inférieur au nombre de termes correspondants $m$.

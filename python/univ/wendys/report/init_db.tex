@@ -1,0 +1,17 @@
+\section{Opérations d'initialisation}
+
+Au démarrage du conteneur Docker, la base de données est initialisée
+automatiquement. Le script est divisé en huit fichiers qui définissent la
+structure. La répartition s'est faite selon les catégories suivantes:
+
+\begin{itemize}
+   \item Création et définition des tables SQL.
+   \item Procédures de modification des éléments de la base.
+   \item Fonctions de calcul et de traitement.
+   \item Définition des vues.
+   \item Fonctions spécifiques aux vues.
+   \item Importation des données à partir des fichiers .csv.
+   \item Mise en place des triggers.
+\end{itemize}
+L'exécution de ce script au démarrage garantit qu'aucune structure n'est
+utilisée avant son initialisation.

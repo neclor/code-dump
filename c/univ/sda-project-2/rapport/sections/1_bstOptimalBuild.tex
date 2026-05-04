@@ -1,0 +1,44 @@
+\section{Pseudo-code et complexité de \texttt{bstOptimalBuild}}
+
+On trie les clés, puis on insère récursivement les médianes
+pour que l'arbre soit équilibré.
+
+\begin{algorithm}[H]
+\caption{\texttt{bstOptimalBuild}(compfn, lkeys, lvalues)}
+\begin{algorithmic}[1]
+\State $pairs =$ tableau de paires clé et valeur
+\State \texttt{QuickSort}($pairs$, $0$, $N$)
+\State \texttt{InsertMedians}($bst$, $pairs$, $0$, $N$)
+\State \Return $bst$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{\texttt{InsertMedians}($bst$, $pairs$, $left$, $right$)}
+\begin{algorithmic}[1]
+\If{$left \geq right$} \Return \EndIf
+\State $m = left + \lfloor(right - left) / 2\rfloor$
+\State \texttt{bstInsert}($bst$, $pairs[m]$)
+\State \texttt{InsertMedians}($bst$, $pairs$, $left$, $m$)
+\State \texttt{InsertMedians}($bst$, $pairs$, $m+1$, $right$)
+\end{algorithmic}
+\end{algorithm}
+
+\subsection*{Complexité}
+
+\begin{itemize}
+    \item \textbf{Construction du tableau:} $O(N)$.
+    \item \textbf{QuickSort:} meilleur et cas moyen $O(N \log N)$, pire cas $O(N^2)$.
+    \item \textbf{InsertMedians:} $N$ insertions, chacune en $O(\log N)$.
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+Cas & Complexité \\
+\midrule
+Meilleur / moyen & $O(N \log N)$ \\
+Pire & $O(N^2)$ \\
+\bottomrule
+\end{tabular}
+\end{center}

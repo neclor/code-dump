@@ -1,0 +1,31 @@
+\section{Implémentation de \texttt{pdctCreate} pour le BST 2D}
+
+\begin{algorithm}[H]
+\caption{\texttt{BuildRecursive}($array$, $left$, $right$, $depth$)}
+\begin{algorithmic}[1]
+\If{$left \geq right$} \Return \textbf{NULL} \EndIf
+\State $m = left + \lfloor(right-left)/2\rfloor$
+\State \texttt{QuickSelect}($array$, $left$, $right$, $m$, $depth$)
+\State $node =$ nouveau node avec $array[m]$
+\State $node.left =$ \texttt{BuildRecursive}($array$, $left$, $m$, $depth + 1$)
+\State $node.right =$ \texttt{BuildRecursive}($array$, $m+1$, $right$, $depth + 1$)
+\State \Return $node$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection*{Complexité}
+
+\begin{itemize}
+    \item \textbf{QuickSelect} meilleur et cas moyen $O(n)$, pire cas $O(n^2)$.
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+Cas & Complexité \\
+\midrule
+Meilleur / moyen & $O(N \log N)$ \\
+Pire & $O(N^2)$ \\
+\bottomrule
+\end{tabular}
+\end{center}

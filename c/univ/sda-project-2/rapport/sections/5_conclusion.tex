@@ -1,0 +1,15 @@
+\section{Conclusion}
+
+La recherche exacte confirme la théorie : la liste est en $O(N)$, les deux
+arbres en $O(\log N)$. À $N=10^6$, la liste prend 39{,}9 s contre moins de
+0{,}001 s pour le BST 2D.
+
+Pour la recherche en boule, le résultat surprenant est que le BST Morton
+devient plus lent que la liste dès que le rayon augmente
+($\times$5{,}1 plus lent à $r=0{,}10$). La raison : la plage $[Z_A, Z_B]$
+contient de nombreux faux positifs, qui croissent plus vite que les vrais
+résultats quand $r$ augmente.
+
+Le BST 2D reste systématiquement le plus rapide grâce à son élagage par plan
+de séparation, efficace même pour de grands rayons. C'est donc l'implémentation
+à privilégier pour l'application taxi de Porto.

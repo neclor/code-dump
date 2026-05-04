@@ -1,0 +1,42 @@
+\section{Pseudo-code et complexité de \texttt{bstRangeSearch}}
+
+\begin{algorithm}[H]
+\caption{\texttt{bstRangeSearch}($bst$, $keymin$, $keymax$)}
+\begin{algorithmic}[1]
+\State $result =$ liste vide
+\State \texttt{bstRangeSearchRecursive}($bst.root$, $keymin$, $keymax$, $result$)
+\State \Return $result$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{\texttt{bstRangeSearchRecursive}($node$, $keymin$, $keymax$, $result$)}
+\begin{algorithmic}[1]
+\If{$node = $ \textbf{NULL}} \Return \EndIf
+\If{$keymin \leq node.key$}
+    \State \texttt{bstRangeSearchRecursive}($node.left$, $keymin$, $keymax$, $result$)
+\EndIf
+\If{$keymin \leq node.key \leq keymax$}
+    \State $result.\text{append}(node.value)$
+\EndIf
+\If{$node.key < keymax$}
+    \State \texttt{bstRangeSearchRecursive}($node.right$, $keymin$, $keymax$, $result$)
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+\subsection*{Complexité}
+
+Soit $k$ le nombre de clés dans $[keymin, keymax]$.
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+Cas & Complexité \\
+\midrule
+Meilleur ($k=0$, intervalle vide) & $O(\log N)$ \\
+Général & $O(\log N + k)$ \\
+Pire ($k=N$, tout l'arbre en range) & $O(N)$ \\
+\bottomrule
+\end{tabular}
+\end{center}

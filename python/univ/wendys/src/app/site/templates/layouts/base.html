@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{% block title %}Wendys{% endblock %}</title>
+  <meta property="og:title" content="Wendys">
+  <meta property="og:description" content="Wendys managment site.">
+  <meta property="og:image" content="{{ url_for('static', filename='favicon.ico') }}">
+
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <nav>
+    <div class="nav-title">Wendys</div>
+
+    <div class="nav-section">Tables</div>
+    <a href="/clients" {% if request.path == '/clients' %}class="active"{% endif %}>Clients</a>
+    <a href="/locations" {% if request.path == '/locations' %}class="active"{% endif %}>Locations</a>
+
+    <div class="nav-section">Events</div>
+    <a href="/events/dashboard" {% if request.path == '/events/dashboard' %}class="active"{% endif %}>Event Dashboard</a>
+    <a href="/events" {% if request.path == '/events' %}class="active"{% endif %}>Events</a>
+    <a href="/events/new" {% if request.path == '/events/new' %}class="active"{% endif %}>New Event</a>
+
+    <div class="nav-section">Cd</div>
+    <a href="/cds/dashboard" {% if request.path == '/cds/dashboard' %}class="active"{% endif %}>Cd Dashboard</a>
+    <a href="/cds/stats" {% if request.path == '/cds/stats' %}class="active"{% endif %}>Cd Stats</a>
+    <a href="/cds/new" {% if request.path == '/cds/new' %}class="active"{% endif %}>Cd New</a>
+
+    <div class="nav-section">Genres</div>
+    <a href="/genres/" {% if request.path == '/genres/' %}class="active"{% endif %}>Taxonomy</a>
+  </nav>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

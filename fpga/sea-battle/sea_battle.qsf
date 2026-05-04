@@ -1,12 +1,12 @@
 # -------------------------------------------------------------------------- #
 #
 # Copyright (C) 2018  Intel Corporation. All rights reserved.
-# Your use of Intel Corporation's design tools, logic functions 
-# and other software and tools, and its AMPP partner logic 
-# functions, and any output files from any of the foregoing 
-# (including device programming or simulation files), and any 
-# associated documentation or information are expressly subject 
-# to the terms and conditions of the Intel Program License 
+# Your use of Intel Corporation's design tools, logic functions
+# and other software and tools, and its AMPP partner logic
+# functions, and any output files from any of the foregoing
+# (including device programming or simulation files), and any
+# associated documentation or information are expressly subject
+# to the terms and conditions of the Intel Program License
 # Subscription Agreement, the Intel Quartus Prime License Agreement,
 # the Intel FPGA IP License Agreement, or other applicable license
 # agreement, including, without limitation, that your use is for
@@ -18,7 +18,7 @@
 #
 # Quartus Prime
 # Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
-# Date created = 22:11:46  March 18, 2026
+# Date created = 16:53:06  March 15, 2026
 #
 # -------------------------------------------------------------------------- #
 #
@@ -36,32 +36,83 @@
 # -------------------------------------------------------------------------- #
 
 
-set_global_assignment -name FAMILY "Cyclone IV E"
-set_global_assignment -name DEVICE EP4CE6E22C8
+set_global_assignment -name FAMILY "MAX V"
+set_global_assignment -name DEVICE 5M160ZE64C5
 set_global_assignment -name TOP_LEVEL_ENTITY sea_battle
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 18.1.0
-set_global_assignment -name PROJECT_CREATION_TIME_DATE "22:11:46  MARCH 18, 2026"
-set_global_assignment -name LAST_QUARTUS_VERSION "25.1std.0 Lite Edition"
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "16:53:06  MARCH 15, 2026"
+set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Lite Edition"
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
-set_global_assignment -name EDA_SIMULATION_TOOL "Questa Altera FPGA (VHDL)"
-set_global_assignment -name EDA_TIME_SCALE "1 ps" -section_id eda_simulation
-set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
-set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
-set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
-set_global_assignment -name VHDL_FILE src/packages/my_std.vhd
-set_global_assignment -name VHDL_FILE src/packages/game_types.vhd
-set_global_assignment -name VHDL_FILE src/packages/conf.vhd
-set_global_assignment -name VHDL_FILE src/components/rng.vhd
-set_global_assignment -name VHDL_FILE src/components/led_matrix_controller.vhd
-set_global_assignment -name VHDL_FILE src/components/button_handler.vhd
-set_global_assignment -name VHDL_FILE src/components/blinker.vhd
-set_global_assignment -name VHDL_FILE src/single_player.vhd
-set_global_assignment -name VHDL_FILE src/sea_battle.vhd
-set_global_assignment -name VHDL_FILE src/logic.vhd
-set_global_assignment -name VHDL_FILE test/test_sea_battle.vhd
-set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
-set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
 set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR "-1"
+set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim-Altera (VHDL)"
+set_global_assignment -name EDA_TIME_SCALE "1 ps" -section_id eda_simulation
+set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
+set_global_assignment -name AUTO_RESTART_CONFIGURATION OFF
+set_global_assignment -name ENABLE_OCT_DONE OFF
+set_global_assignment -name ENABLE_CONFIGURATION_PINS OFF
+set_global_assignment -name ENABLE_BOOT_SEL_PIN OFF
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "NO HEAT SINK WITH STILL AIR"
+set_location_assignment PIN_22 -to i_buttons[3]
+set_location_assignment PIN_45 -to i_buttons[0]
+set_location_assignment PIN_44 -to i_buttons[1]
+set_location_assignment PIN_42 -to i_buttons[2]
+set_location_assignment PIN_7 -to clk
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to i_buttons[3]
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to i_buttons[2]
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to i_buttons[1]
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to i_buttons[0]
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to i_buttons
+set_location_assignment PIN_47 -to o_info_leds[0]
+set_location_assignment PIN_46 -to o_info_leds[1]
+set_location_assignment PIN_20 -to o_info_leds[2]
+set_location_assignment PIN_21 -to o_info_leds[3]
+set_location_assignment PIN_32 -to o_info_leds[4]
+set_location_assignment PIN_31 -to o_info_leds[5]
+set_location_assignment PIN_30 -to o_info_leds[6] -comment Debug
+set_location_assignment PIN_29 -to o_info_leds[7] -comment Lose
+set_global_assignment -name EDA_TEST_BENCH_ENABLE_STATUS TEST_BENCH_MODE -section_id eda_simulation
+set_global_assignment -name EDA_NATIVELINK_SIMULATION_TEST_BENCH test_sea_battle -section_id eda_simulation
+set_global_assignment -name EDA_TEST_BENCH_NAME test_sea_battle -section_id eda_simulation
+set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id test_sea_battle
+set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME test_sea_battle -section_id test_sea_battle
+set_global_assignment -name EDA_TEST_BENCH_FILE test/test_sea_battle.vhd -section_id test_sea_battle
+
+set_global_assignment -name OPTIMIZATION_MODE BALANCED
+set_global_assignment -name AUTO_RESOURCE_SHARING ON
+set_location_assignment PIN_24 -to i_buttons[4]
+set_location_assignment PIN_25 -to i_buttons[5]
+set_location_assignment PIN_56 -to o_led_rows_1[0]
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to i_buttons[4]
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to i_buttons[5]
+set_location_assignment PIN_3 -to o_led_rows_2[0]
+set_location_assignment PIN_60 -to o_led_rows_1[1]
+set_location_assignment PIN_11 -to o_led_rows_2[1]
+set_location_assignment PIN_63 -to o_led_rows_1[2]
+set_location_assignment PIN_18 -to o_led_rows_2[2]
+set_location_assignment PIN_54 -to o_led_columns_1_green[0]
+set_location_assignment PIN_1 -to o_led_columns_2_green[0]
+set_location_assignment PIN_58 -to o_led_columns_1_green[1]
+set_location_assignment PIN_4 -to o_led_columns_2_green[1]
+set_location_assignment PIN_61 -to o_led_columns_1_green[2]
+set_location_assignment PIN_12 -to o_led_columns_2_green[2]
+set_location_assignment PIN_55 -to o_led_columns_1_red[0]
+set_location_assignment PIN_2 -to o_led_columns_2_red[0]
+set_location_assignment PIN_5 -to o_led_columns_2_red[1]
+set_location_assignment PIN_59 -to o_led_columns_1_red[1]
+set_location_assignment PIN_62 -to o_led_columns_1_red[2]
+set_location_assignment PIN_13 -to o_led_columns_2_red[2]
+
+set_global_assignment -name VHDL_FILE src/packages/boolean_vector_pkg.vhd
+set_global_assignment -name VHDL_FILE src/components/bicolor_led_matrix_controller.vhd
+set_global_assignment -name VHDL_FILE test/test_sea_battle.vhd
+set_global_assignment -name VHDL_FILE src/packages/game_types.vhd
+set_global_assignment -name VHDL_FILE src/packages/game_config.vhd
+set_global_assignment -name VHDL_FILE src/components/button_handler.vhd
+set_global_assignment -name VHDL_FILE src/sea_battle.vhd
+set_location_assignment PIN_26 -to i_reset
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to i_reset

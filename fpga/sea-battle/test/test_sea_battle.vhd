@@ -1,8 +1,8 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use work.my_std.all;
+use work.boolean_vector_pkg.all;
 
-use work.conf.all;
+use work.game_config.all;
 use work.game_types.all;
 
 
@@ -11,25 +11,38 @@ end entity;
 
 
 architecture sim of test_sea_battle is
-	signal clk: std_logic := '0';
+	signal clk : std_logic := '0';
 
-	signal i_buttons: std_logic_vector(0 to BUTTON_COUNT - 1) := (others => '1');
-	signal i_noise: std_logic := '0';
+	signal i_reset : std_logic := '1';
+	signal i_buttons : std_logic_vector(0 to BUTTON_MAX - 1) := (others => '1');
 
-	signal o_led_rows: std_logic_vector(0 to FIELD_SIZE.y - 1);
-	signal o_led_columns: std_logic_vector(0 to FIELD_SIZE.x - 1);
-	signal o_info_leds: std_logic_vector(0 to 7);
+	signal o_led_rows_1 : std_logic_vector(0 to FIELD_SIZE_Y - 1);
+	signal o_led_rows_2 : std_logic_vector(0 to FIELD_SIZE_Y - 1);
+
+	signal o_led_columns_green_1 : std_logic_vector(0 to FIELD_SIZE_X - 1);
+	signal o_led_columns_red_1 : std_logic_vector(0 to FIELD_SIZE_X - 1);
+
+	signal o_led_columns_green_2 : std_logic_vector(0 to FIELD_SIZE_X - 1);
+	signal o_led_columns_red_2 : std_logic_vector(0 to FIELD_SIZE_X - 1);
+
+	signal o_info_leds : std_logic_vector(0 to 7);
 begin
 
 	u_sea_battle: entity work.sea_battle
 	port map (
 		clk => clk,
 
+		i_reset => i_reset,
 		i_buttons => i_buttons,
-		i_noise => i_noise,
 
-		o_led_rows => o_led_rows,
-		o_led_columns => o_led_columns,
+		o_led_rows_1 => o_led_rows_1,
+		o_led_rows_2 => o_led_rows_2,
+
+		o_led_columns_1_green => o_led_columns_green_1,
+		o_led_columns_1_red => o_led_columns_red_1,
+
+		o_led_columns_2_green => o_led_columns_green_2,
+		o_led_columns_2_red => o_led_columns_red_2,
 		o_info_leds => o_info_leds
 	);
 
@@ -47,7 +60,6 @@ begin
 	stim_proc: process
 	begin
 		i_buttons <= (others => '1');
-		i_noise <= '0';
 		wait for 1 ms;
 
 		-- place ship

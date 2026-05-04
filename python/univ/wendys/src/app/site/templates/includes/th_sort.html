@@ -1,0 +1,20 @@
+{% macro th_sort(column, label) %}
+
+{% set current_column = request.args.get('sort', '') %}
+{% set current_order = request.args.get('order', 'asc') %}
+
+{% set args = request.args.to_dict() %}
+{% set _ = args.update({'sort': column, 'order': 'desc' if (current_column == column and current_order == 'asc') else 'asc'}) %}
+
+<th class="th-sort {% if current_column == column %}th-sort-active{% endif %}">
+  <a href="?{{ args | urlencode }}">
+    {{ label }}
+    {% if current_column == column %}
+      {% if current_order == 'asc' %}↑{% else %}↓{% endif %}
+    {% else %}
+      <span class="th-sort-idle">↕</span>
+    {% endif %}
+  </a>
+</th>
+
+{% endmacro %}

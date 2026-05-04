@@ -1,0 +1,14 @@
+main {
+    flex: 1;
+    padding: var(--space-2xl);
+}
+
+h1 {
+    margin-bottom: var(--space-xl);
+    font-size: var(--font-size-2xl);
+}
+
+h2 {
+    margin-bottom: var(--space-lg);
+    font-size: var(--font-size-xl);
+}

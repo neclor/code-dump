@@ -1,0 +1,42 @@
+{% extends "layouts/base.html" %}
+{% from "includes/th_sort.html" import th_sort %}
+
+{% block title %}Clients - Wendys{% endblock %}
+
+{% block content %}
+
+<h1>Clients</h1>
+
+{% include "includes/filter_bar.html" with context %}
+
+{% if clients is defined %}
+
+<table>
+  <thead>
+    <tr>
+      {{ th_sort('client_number', '#') }}
+      {{ th_sort('first_name',    'First name') }}
+      {{ th_sort('last_name',     'Last name') }}
+      {{ th_sort('email_address', 'Email') }}
+      {{ th_sort('phone_number',  'Phone number') }}
+    </tr>
+  </thead>
+  <tbody>
+    {% for client in clients %}
+    <tr>
+      <td>{{ client.client_number }}</td>
+      <td>{{ client.first_name }}</td>
+      <td>{{ client.last_name }}</td>
+      <td>{{ client.email_address }}</td>
+      <td>{{ client.phone_number or '-' }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="5" class="td-empty">No results</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endif %}
+{% endblock %}

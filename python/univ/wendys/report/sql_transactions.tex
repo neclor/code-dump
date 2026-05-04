@@ -1,0 +1,9 @@
+
+Toute modification apportée à la base de données passe par une transaction. Ce 
+mécanisme garantit l'intégrité des données: en cas de succès, les changements 
+sont validés définitivement (commit), en cas d'erreur, le système effectue un 
+retour à l'état initial (rollback).
+
+Afin d'assurer la cohérence lors d'opérations simultanées, nous utilisons des 
+verrous (locks) sur les données concernées, empêchant ainsi tout conflit durant 
+l'exécution des modifications.

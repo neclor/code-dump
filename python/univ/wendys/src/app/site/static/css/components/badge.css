@@ -1,0 +1,11 @@
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-past   { background: var(--color-badge-past-bg);   color: var(--color-badge-past-text); }
+.badge-today  { background: var(--color-badge-today-bg);  color: var(--color-badge-today-text); }
+.badge-future { background: var(--color-badge-future-bg); color: var(--color-badge-future-text); }

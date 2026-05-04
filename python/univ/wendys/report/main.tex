@@ -1,0 +1,33 @@
+\documentclass[a4paper, 11pt, oneside]{article}
+\input{settings.tex}
+
+\newcommand{\courseNb}{INFO0009}
+\newcommand{\intitule}{WeND(Y)'s Party Management System}
+\newcommand{\PrenomUN}{Aleksandr}
+\newcommand{\NomUN}{Pavlov}
+\newcommand{\PrenomDEUX}{Marco}
+\newcommand{\NomDEUX}{Kuckart}
+\newcommand{\PrenomTROIS}{Adrien}
+\newcommand{\NomTROIS}{Cormann}
+
+\title{\courseNb : \intitule}
+\author{\PrenomUN~\textsc{\NomUN}, \PrenomDEUX~\textsc{\NomDEUX}, \PrenomTROIS~\textsc{\NomTROIS}}
+\date{}
+\begin{document}
+
+\maketitle
+\newpage
+\newpage
+
+\input{website.tex}
+\input{init_db.tex}
+\input{sql.tex}
+\section{Répartition du travail}
+\begin{enumerate}
+\item Aleksandr Pavlov: Code du site web et des requêtes SQL pour accéder aux données, architecture globale du programme.
+\item Marco Kuckart: Création des tables de la base de donnée, de certaines vues, et des triggers/procédure veillant a l'intégrité de la base de donnée.
+\item Adrien Cormann: Soutien et aide a la rédaction du rapport.
+\end{enumerate}
+
+\end{document}
+

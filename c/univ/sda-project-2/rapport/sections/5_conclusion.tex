@@ -4,12 +4,24 @@ La recherche exacte confirme la théorie : la liste est en $O(N)$, les deux
 arbres en $O(\log N)$. À $N=10^6$, la liste prend 39{,}9 s contre moins de
 0{,}001 s pour le BST 2D.
 
-Pour la recherche en boule, le résultat surprenant est que le BST Morton
-devient plus lent que la liste dès que le rayon augmente
-($\times$5{,}1 plus lent à $r=0{,}10$). La raison : la plage $[Z_A, Z_B]$
-contient de nombreux faux positifs, qui croissent plus vite que les vrais
-résultats quand $r$ augmente.
+Le résultat le plus surprenant est que le BST Morton devient plus lent
+que la simple liste dès que le rayon augmente.
+Ce comportement s'explique par deux effets combinés.
 
-Le BST 2D reste systématiquement le plus rapide grâce à son élagage par plan
-de séparation, efficace même pour de grands rayons. C'est donc l'implémentation
-à privilégier pour l'application taxi de Porto.
+\paragraph{1. Faux positifs}
+Pour chercher des points, on calcule les codes Z des deux coins d'un carré.
+Ensuite, on cherche dans l'arbre tous les éléments entre ces deux codes.
+Le problème est que la courbe en Z passe par de grandes zones qui n'ont rien à voir avec notre carré.
+Résultat : on doit vérifier beaucoup plus de points que nécessaire.
+
+\paragraph{2. Gestion de la mémoire}
+Avec les codes de Morton, l'algorithme crée un nœud en mémoire pour chaque élément trouvé, même s'il est hors du rayon.
+Ensuite, il doit supprimer ces nœuds inutiles. C'est très lourd.
+Au contraire, la recherche linéaire n'utilise de la mémoire que pour les bons éléments.
+Cette perte de temps pour créer et supprimer des éléments inutiles ralentit beaucoup l'algorithme.
+
+\paragraph{Conclusion}
+
+L'arbre de recherche 2D reste la solution la plus rapide.
+Il permet de "couper" des parties entières du plan (pruning), ce qui est efficace même pour de grands rayons.
+C’est donc la meilleure solution pour une application de taxi à Porto.

@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="TODO.md" />
+  </Folder>
+  <Project Path="Client/Client.csproj" Id="9c23a040-2d21-45fc-b365-be97615ee0ea" />
+  <Project Path="Core/Core.csproj" />
+  <Project Path="Server/Server.csproj" Id="1d3ba5b5-eb7c-4622-9131-ebd563fca8be" />
+  <Project Path="Shared/Shared.csproj" Id="68965337-361f-4ed6-ac05-55cb211a9903" />
+</Solution>

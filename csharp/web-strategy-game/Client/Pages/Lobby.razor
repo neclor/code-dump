@@ -1,0 +1,93 @@
+@page "/lobby/{LobbyCode}"
+
+@inject NavigationManager Nav
+@inject HubConnectionProvider HubConnectionProvider
+
+<div class="center">
+
+	<h1>Lobby</h1>
+	
+
+</div>
+
+
+
+
+
+
+
+
+@code {
+
+	[Parameter]
+	public string? LobbyCode { get; set; }
+	
+	protected override async Task OnParametersSetAsync() {
+		if (string.IsNullOrEmpty(LobbyCode)) {
+			Nav.NavigateTo("/");
+			return;
+		}
+
+
+		var joined = await LobbyService.JoinLobbyAsync(Code);
+		if (joined)
+		Nav.NavigateTo($"/lobby/{LobbyCode}");
+		else
+		NavigationManager.NavigateTo("/error");
+	}
+
+
+
+
+
+
+
+
+
+
+	private List<Player> Players = new();
+
+
+	bool IsHost = true; // логика определить кто хост
+
+	protected override void OnInitialized() {
+		// Если нет соединения с сервером — добавить 1 ИИ
+
+	}
+
+	void AddAIPlayer() {
+
+	}
+
+	void StartGame() {
+		// логика начала игры
+	}
+
+
+	void RemovePlayer(Player p) {
+		
+	}
+
+
+	void CopyLink() {
+		// JSInterop для копирования в буфер
+	}
+
+	bool ServerAvailable() => false; // проверка соединения с сервером
+
+
+	class Player {
+		public string Name { get; set; }
+		public bool IsAI { get; set; } = false;
+	}
+
+
+
+
+
+
+
+
+}
+
+

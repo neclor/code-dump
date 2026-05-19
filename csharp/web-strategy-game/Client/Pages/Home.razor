@@ -1,0 +1,20 @@
+@page "/"
+@page "/index"
+@page "/home"
+
+@inject NavigationManager Nav
+@inject HubConnectionProvider HubConnectionProvider
+
+<div class="center">
+	<h1>Sillyzation</h1>
+	<button @onclick="OnCreateGame">Create Game</button>
+</div>
+
+@code {
+
+	private async Task OnCreateGame() {
+		if (HubConnectionProvider.HubConnection!.State == HubConnectionState.Disconnected) return;
+		string gameCode = await HubConnectionProvider.ServerConnection.CreateGameAsync();
+		Nav.NavigateTo($"/lobby/{gameCode}");
+	}
+}

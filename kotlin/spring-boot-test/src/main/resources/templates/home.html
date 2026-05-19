@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Persons</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 16px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; }
+        th { background: #f0f0f0; }
+        form { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+        input { padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 6px 14px; cursor: pointer; border: 1px solid #999; border-radius: 4px; }
+        h2 { margin-top: 32px; }
+        .empty { color: #888; padding: 12px 0; }
+    </style>
+</head>
+<body>
+
+<h1>Persons</h1>
+
+<!-- Search -->
+<form method="get" th:action="@{/}">
+    <input type="text" name="name" placeholder="Search by name" th:value="${search}"/>
+    <button type="submit">Search</button>
+    <a th:if="${!#strings.isEmpty(search)}" href="/">Clear</a>
+</form>
+
+<!-- Table -->
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Age</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="person : ${persons}">
+            <td th:text="${person.name}"/>
+            <td th:text="${person.age}"/>
+        </tr>
+        <tr th:if="${#lists.isEmpty(persons)}">
+            <td colspan="2" class="empty">No persons found</td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Add -->
+<h2>Add person</h2>
+<form method="post" th:action="@{/}">
+    <input type="text"   name="personName" placeholder="Name"    required/>
+    <input type="number" name="age"        placeholder="Age" required min="18"/>
+    <button type="submit">Add</button>
+</form>
+
+</body>
+</html>

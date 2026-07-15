@@ -1,0 +1,21 @@
+\section{Trouver le MST d'un graphe}
+
+Un arbre couvrant minimal (MST) est un arbre couvrant dont le poids total est le plus petit possible.
+
+Dans le cadre du projet, trois algorithmes classiques de construction d'un MST ont été réalisés : l'algorithme de Kruskal, l'algorithme de Prim et l'algorithme par suppression inverse.
+
+\subsection{Algorithme de Kruskal}
+Kruskal trie les arêtes par poids et les ajoute une à une à l'arbre, en évitant de former des cycles.
+La première version implémentait une vérification explicite des cycles, ce qui pour un graphe complet de 1000 sommets prenait environ une seconde.
+La version améliorée utilise une structure DSU (Union-Find), ce qui réduit le temps de calcul d'environ moitié.
+Cet algorithme s'est révélé très rapide par rapport aux autres méthodes.
+
+\subsection{Algorithme de Prim}
+Prim construit l'arbre à partir d'un sommet de départ : à chaque étape, on choisit l'arête de poids minimal qui relie l'arbre partiel à un sommet non encore inclus.
+Dans notre implémentation, cette version a montré des performances bien inférieures à Kruskal.
+Mais on peut l'améliorer considérablement en utilisant une structure de données différente pour stocker les arêtes.
+
+\subsection{Algorithme par suppression inverse}
+Cette méthode trie les arêtes par poids décroissant et tente de supprimer successivement l'arête la plus lourde tout en conservant la connexité.
+Elle s'est avérée plus lente comparée àux l'autres.
+On peut peut l'améliorer en améliorant la façon dont on vérifie que le graphe est connexe.

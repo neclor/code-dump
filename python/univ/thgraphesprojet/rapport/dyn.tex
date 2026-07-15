@@ -1,0 +1,35 @@
+\section{Mettre à jour le MST dynamiquement}
+
+Pour mettre le MST à jour dynamiquement, on peut séparer le problème en plusieurs cas.
+
+Si on retire une arrête du graphe (ou on augment son poid), mais que celle-ci n'était pas dans le MST, celui-ci ne change pas.
+On peut donc garder le MST comme il était.
+
+Si on diminue le poid d'une arrête, cette fois ci dans le MST, celui-ci reste à nouveau le même.
+
+Par contre, il nous reste le cas de si on augmente le poids (ou qu'on retire) une arrête du MST, et le cas de si on rajoute une arrête ou diminue le poid d'une arrête hors du MST.
+
+\subsection{Augmenter un poid ou retirer une arrête}
+
+Supposons que le changement depuis le graphe précédent est que le poid d'une arrête a augmenté.
+
+Le MST étant un arbre, n'importe quelle arrête sépare le graphe en 2 composantes.
+Ces 2 composantes sont aussi les MST des sous-graphes contenant les sommets de leurs composantes respectives.
+Ne changeant qu'une arrête, celle-ci sépare le graphe en 2 sous-MST.
+La question devient donc, quelle arrête doit-on utiliser pour reconnecter ces composantes ?
+
+Si au lieu d'avoir augmenté le poid d'une arrête, on en a retiré une, un même raisonement nous amêne à la même conclusion, avec pour seul différence le fait que l'arrête retirée ne peut plus être choisie pour connecter le graphe.
+
+Pour notre algorithme, nous allons retirer l'arrête dans tout les cas, et ensuite la réajouter si nécessaire.
+Cela nous permet de ne considérer que le cas de retirer une arrête.
+
+Il faut aussi faire attention à si on retire une arrête, il est possible que le graphe ne soit plus connexe.
+
+\subsection{Diminuer un poid, ou rajouter une arrête}
+
+Supposons que le changement est qu'un poid a diminué (hors du MST), ou qu'une arrête a été rajoutée.
+
+Dans ce cas ci, on doit choisir d'inclure ou non cette arrête dans notre MST, et si oui, quelle arrête retirer.
+Si on rajoute l'arrête à notre MST, on rajoute 1 cycle dans le MST.
+Pour avoir à nouveau un MST, il faut donc "casser" ce cycle, que l'on peut faire en retirant n'importe quelle arrête du cycle.
+Mais on veut un MST, donc on retire l'arrête avec le poids le plus grand.

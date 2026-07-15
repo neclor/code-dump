@@ -1,0 +1,10 @@
+\section{Trouver une seconde solution}
+
+Pour trouver un autre MST, il nous faut un MST, avec comme restriction que au moins une arrête doit être différente du premier MST.
+
+Pour la prochaine question, nous avons du faire une fonction qui modifie un MST en fonction d'un changement sur un graphe.
+En faisant un peu de chipotage, on peut réutiliser cetter fonction pour trouver un MST sur un même graphe, mais en empêchant une arrête de se retrouver dans le nouveau MST.
+
+Une fois ça fait, on peut utiliser cette fonction sur notre MST, en retirant une arrête du MST donné. Si cela nous donne un meilleur résultat que précédamment trouvé, on enregistre ce résultat, et recommence avec une autre arrête.
+
+Une fois que toute les arrêtes sont passée, ou que l'on a trouvé un MST avec le même poid total que le premier MST, on peut s'areter et on a notre meilleur prochain candidat comme MST.

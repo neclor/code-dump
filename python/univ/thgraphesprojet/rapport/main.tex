@@ -1,0 +1,32 @@
+% !TEX root = ./main.tex
+% !TEX engine = latexmk -pdf
+% !TEX buildOnSave = true
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{hyperref}
+\usepackage{bookmark}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+
+% gets rid of overfull boxes
+\hbadness=10000
+\hfuzz=50pt
+
+\title{Minimum Spanning Tree}
+\author{Lardinois Joachim s2402075\\Aleksandr Pavlov s2400691}
+
+\begin{document}
+  \maketitle
+  \tableofcontents
+
+  \input{intro.tex}
+  \include{utilisation.tex}
+  \include{mst.tex}
+  \include{other.tex}
+  \include{dyn.tex}
+  \include{src.tex}
+\end{document}

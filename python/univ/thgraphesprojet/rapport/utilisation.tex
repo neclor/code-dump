@@ -1,0 +1,79 @@
+\section{Guide d'utilisation du programme}
+
+Pour exécuter le programme, ouvrez un terminal dans le répertoire du projet et lancez :
+
+\begin{verbatim}
+python -m src.main
+\end{verbatim}
+
+Le programme dispose de deux modes principaux : un mode commande classique et un mode interactif.
+
+\subsection{Mode commande classique}
+
+Pour obtenir l'aide générale et les options disponibles, utilisez :
+
+\begin{verbatim}
+python -m src.main -h
+\end{verbatim}
+
+La sortie affiche :
+
+\begin{verbatim}
+usage: Graphoni [-h] [-a {kruskal,prim,reverse}] [-s] [-i] [-v] [input] [output]
+
+Util for finding MST of graph
+
+positional arguments:
+  input                 input file
+  output                output file
+
+options:
+  -h, --help            show this help message and exit
+  -a, --algorithm {kruskal,prim,reverse}
+                        choose algorithm
+  -s, --second          find second MST
+  -i, --interactive     run interactive mode
+  -v, --version         show version
+\end{verbatim}
+
+\textbf{Explications des options :}
+\begin{itemize}
+    \item \texttt{-a, --algorithm} : choisir l'algorithme pour le calcul de l'arbre couvrant minimal (Kruskal, Prim ou Reverse Delete). Par défaut : Kruskal.
+    \item \texttt{-s, --second} : calculer le second MST.
+    \item \texttt{-i, --interactive} : lancer le mode interactif.
+    \item \texttt{input} : fichier d'entrée contenant le graphe.
+    \item \texttt{output} : fichier de sortie pour enregistrer le résultat.
+\end{itemize}
+
+\subsection{Mode interactif}
+
+Le mode interactif permet de modifier le graphe et de calculer le MST en temps réel.
+Pour l'activer, lancez :
+
+\begin{verbatim}
+python -m src.main -i
+\end{verbatim}
+
+Les principales commandes disponibles :
+
+\begin{itemize}
+    \item \texttt{load <path>} : charger un graphe depuis un fichier.
+    \item \texttt{save <path>} : enregistrer le graphe ou le MST dans un fichier.
+    \item \texttt{add <u> (<v> <weight>)} : ajouter un sommet ou une arête au graphe.
+    \item \texttt{remove <u> (<v>)} : supprimer un sommet ou une arête.
+    \item \texttt{mst (<algorithm> -s)} : calculer le MST. On peut spécifier l'algorithme et l'option step-by-step.
+    \item \texttt{update <u> <v> (<weight>)} : mettre à jour le graphe et recalculer le MST après modification.
+    \item \texttt{second} : trouver le second MST.
+    \item \texttt{keep} : remplacer le graphe original par le graphe résultat pour les prochaines opérations.
+    \item \texttt{origin} : afficher le graphe original.
+    \item \texttt{repos} : repositionner le graphe.
+    \item \texttt{help} : afficher l'aide dans le mode interactif.
+    \item \texttt{exit} : quitter le mode interactif.
+\end{itemize}
+
+\subsection{Remarques pratiques}
+
+\begin{itemize}
+    \item Toujours lancer le programme depuis le répertoire principal du projet pour que les chemins relatifs fonctionnent correctement.
+    \item Le mode interactif est particulièrement utile pour tester différentes modifications sur le graphe sans avoir à relancer le programme.
+\end{itemize}

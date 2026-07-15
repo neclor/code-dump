@@ -1,0 +1,118 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam nodesep 60
+skinparam ranksep 90
+skinparam class {
+    BackgroundColor White
+    BorderColor #444
+    ArrowColor #444
+    FontSize 12
+    AttributeFontSize 11
+}
+skinparam package {
+    BorderColor #888
+    BackgroundColor #F5F5F5
+    FontSize 12
+}
+skinparam arrow {
+    FontSize 11
+}
+
+package "be.uliege.info0027.deduplication" <<Frame>> {
+    interface FileDeduplicationBootstrap {
+        +initialize(fs: VirtualFileSystem): void
+        +getFrontendGate(): FrontendGate
+        +getStorageChecker(): StorageChecker
+    }
+
+    interface FrontendGate {
+        +accept(json: String): String
+        +acceptStream(json: String): Stream<String>
+    }
+
+    interface StorageChecker {
+        +findDuplicate(path: Path): VirtualFileInfo?
+    }
+
+    interface VirtualFileSystem {
+        +listContent(): Collection<VirtualFileInfo>
+        +listContent(userId: String, path: String): Collection<VirtualFileInfo>
+    }
+
+    class VirtualFileInfo {
+        +virtualPath: String
+        +isDirectory: Boolean
+        +fileSize: Long
+        +userId: String
+        +physicalPath: String
+    }
+}
+
+package "filededuplicators" {
+    interface FileDeduplicator {
+        +findDuplicateGroups(userId: String, path: String): Collection<Set<VirtualFileInfo>>
+    }
+
+    class KotlinFileDeduplicator {
+        -hashGroups: Map<String, List<MutableSet<VirtualFileInfo>>>
+        -infoToHash: Map<VirtualFileInfo, String>
+        -pathToInfo: Map<Path, VirtualFileInfo>
+        +findDuplicate(path: Path): VirtualFileInfo?
+        +findDuplicateGroups(userId: String, path: String): Collection<Set<VirtualFileInfo>>
+    }
+
+    class ImageFileDeduplicator {
+        -infoToMat: Map<VirtualFileInfo, Mat>
+        -groups: List<MutableSet<VirtualFileInfo>>
+        +findDuplicate(path: Path): VirtualFileInfo?
+        +findDuplicateGroups(userId: String, path: String): Collection<Set<VirtualFileInfo>>
+    }
+}
+
+class FileDeduplicationBootstrapImpl {
+    -frontendGate: FrontendGate
+    -exactDeduplicator: FileDeduplicator
+    -similarDeduplicator: FileDeduplicator
+    +initialize(fs: VirtualFileSystem): void
+    +getFrontendGate(): FrontendGate
+    +getStorageChecker(): StorageChecker
+}
+
+class FrontendGateImpl {
+    -exactDeduplicator: FileDeduplicator
+    -similarDeduplicator: FileDeduplicator
+    +accept(json: String): String
+    +acceptStream(json: String): Stream<String>
+    -parseRequest(json: String): Request
+    -buildSuccessResponse(...): String
+    -buildErrorResponse(...): String
+}
+
+' Force Bootstrap on same row as FrontendGateImpl
+FileDeduplicationBootstrapImpl -[hidden]right- FrontendGateImpl
+
+' Inheritance
+FileDeduplicator -up-|> StorageChecker
+
+' Implementations
+KotlinFileDeduplicator .up.|> FileDeduplicator
+ImageFileDeduplicator .up.|> FileDeduplicator
+FileDeduplicationBootstrapImpl .up.|> FileDeduplicationBootstrap
+FrontendGateImpl .up.|> FrontendGate
+
+' Bootstrap creates/composes
+FileDeduplicationBootstrapImpl *--> FrontendGateImpl : creates
+FileDeduplicationBootstrapImpl *--> KotlinFileDeduplicator : creates
+FileDeduplicationBootstrapImpl *--> ImageFileDeduplicator : creates
+
+' FrontendGateImpl holds two strategy instances
+FrontendGateImpl o--> KotlinFileDeduplicator : exact
+FrontendGateImpl o--> ImageFileDeduplicator : similar
+
+' Engines use VFS
+KotlinFileDeduplicator --> VirtualFileSystem : uses
+ImageFileDeduplicator --> VirtualFileSystem : uses
+
+@enduml

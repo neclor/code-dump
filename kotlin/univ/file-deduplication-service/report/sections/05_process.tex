@@ -1,0 +1,19 @@
+\section{Design Process}
+
+\textbf{Transitive image grouping.}
+If A$\sim$B and B$\sim$C, all three must share a group.
+The indexing loop adds each new image to the first existing group containing a similar member,
+otherwise it opens a new group.
+
+\textbf{Hash-collision safety.}
+SHA-256 collisions are infeasible in practice,
+but files within the same hash bucket are still partitioned by bytewise equality to avoid false positives.
+
+\textbf{Serving two teams with one object.}
+\texttt{FileDeduplicator} extends \texttt{StorageChecker},
+so the same engine instance satisfies both the Frontend and Storage contracts.
+
+\textbf{Extending the provided VFS interface.}
+The provided \texttt{VirtualFileSystem} interface only lists direct children of a given path,
+it does not offer recursive traversal or a way to retrieve all files across all users.
+Rather than creating a wrapper class or subclass, extension functions were added to \texttt{VirtualFileSystem}.

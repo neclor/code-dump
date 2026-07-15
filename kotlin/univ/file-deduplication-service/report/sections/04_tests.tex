@@ -1,0 +1,11 @@
+\section{Test Plan}
+
+Tests are run via \texttt{./gradlew test}. The full implementation is in \texttt{src/test/kotlin/}.
+The fixture \texttt{TestFileSystem} simulates two users (alice, bob) with controlled file contents and sample images to produce known duplicate groups.
+Test logs are provided in the annex.
+
+\begin{itemize}[noitemsep, topsep=2pt]
+    \item \textbf{KotlinFileDeduplicatorTest} - covers group correctness, path scoping, user isolation, and on-the-fly duplicate detection via \texttt{findDuplicate} for both indexed and new files.
+    \item \textbf{ImageFileDeduplicatorTest} - covers similarity-based grouping, cross-user detection, and correct handling of non-image files.
+    \item \textbf{FrontendGateImplTest} - covers JSON parsing, all invalid input combinations, and stream output correctness.
+\end{itemize}

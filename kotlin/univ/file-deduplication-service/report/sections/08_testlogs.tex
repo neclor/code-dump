@@ -1,0 +1,35 @@
+\section{Test Logs}
+\label{app:testlogs}
+
+Output of \texttt{./gradlew test} (Gradle 9.4.0, JDK 25, Kotlin 2.3.20).
+
+\begin{lstlisting}[language={}]
+> Task :test
+
+KotlinFileDeduplicatorTest > alice has one duplicate group across root PASSED
+KotlinFileDeduplicatorTest > alice docs folder has no duplicates PASSED
+KotlinFileDeduplicatorTest > bob has no duplicates within his files PASSED
+KotlinFileDeduplicatorTest > findDuplicate finds duplicate for indexed file PASSED
+KotlinFileDeduplicatorTest > findDuplicate returns null for unique indexed file PASSED
+KotlinFileDeduplicatorTest > findDuplicate finds duplicate for new file not in index PASSED
+KotlinFileDeduplicatorTest > findDuplicate returns null for new unique file PASSED
+
+ImageFileDeduplicatorTest > alice has one duplicate image group PASSED
+ImageFileDeduplicatorTest > bob has no duplicate image groups PASSED
+ImageFileDeduplicatorTest > findDuplicate finds similar image from another user PASSED
+ImageFileDeduplicatorTest > findDuplicate finds similar image within same user PASSED
+ImageFileDeduplicatorTest > findDuplicate returns null for non-image file PASSED
+
+FrontendGateImplTest > accept returns success for valid exact scan PASSED
+FrontendGateImplTest > accept returns success for valid similar scan PASSED
+FrontendGateImplTest > accept returns error for invalid json PASSED
+FrontendGateImplTest > accept returns error for missing action PASSED
+FrontendGateImplTest > accept returns error for unsupported action PASSED
+FrontendGateImplTest > accept returns error for unsupported scan_type PASSED
+FrontendGateImplTest > accept returns error for missing path PASSED
+FrontendGateImplTest > accept returns error for missing user PASSED
+FrontendGateImplTest > acceptStream returns one element per duplicate group PASSED
+FrontendGateImplTest > acceptStream returns error stream on invalid request PASSED
+
+BUILD SUCCESSFUL in 14s
+\end{lstlisting}

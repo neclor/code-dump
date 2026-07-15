@@ -1,0 +1,30 @@
+\section{Software Design Patterns}
+
+\subsection{Strategy}
+
+\texttt{FileDeduplicator} is the main interface.
+\texttt{KotlinFileDeduplicator} and \texttt{ImageFileDeduplicator} are different implementations.
+\texttt{FrontendGateImpl} chooses which one to use at runtime based on \texttt{scan\_type}.
+
+To add a new deduplication engine, only a new class is needed. The routing code does not need to change.
+
+\textbf{Trade-off:} Both engines are created at startup, even if only one is used. This uses more memory.
+Lazy initialization would reduce startup cost, but the first request would be slower.
+
+\subsection{Adapter}
+
+\texttt{FrontendGateImpl} acts as an adapter between external JSON requests and the internal deduplication system.
+It converts JSON input into calls to \texttt{FileDeduplicator} implementations and converts internal results back into JSON responses.
+It also catches \texttt{RequestException}s and returns \texttt{\{"status":"error"\}} responses instead of raw exceptions.
+
+This allows the internal deduplication logic to stay independent from the external request format.
+
+\textbf{Trade-off:} \texttt{FrontendGateImpl} depends on both the external API format and the internal deduplication interfaces.
+Changes on either side may require updating the adapter.
+
+\subsection{Service Locator}
+
+\texttt{FileDeduplicationBootstrapImpl} acts as a service locator.
+It creates and stores instances of \texttt{FrontendGate} and \texttt{StorageChecker}. It then provides access to them through getter methods.
+
+The class is also registered in \texttt{META-INF/services/}, which allows the test suite to find it automatically using \texttt{FileDeduplicationBootstrap} without knowing the implementation class name.

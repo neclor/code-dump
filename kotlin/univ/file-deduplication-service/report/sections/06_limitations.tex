@@ -1,0 +1,12 @@
+\section{Limitations}
+
+\begin{itemize}[noitemsep, topsep=2pt]
+    \item \textbf{$O(n)$ image lookup.} \texttt{findDuplicate}
+        for images scans all stored matrices, which may be too slow for on-the-fly upload checking at scale.
+
+    \item \textbf{Transitive similarity is not guaranteed.}
+        With a long chain of slightly changing images, the first and last images could end up being totally different.
+
+    \item \textbf{Duplicate memory index.}
+        Each deduplication engine keeps its own file index, which increases memory usage.
+\end{itemize}

@@ -1,0 +1,35 @@
+\section{Quality Assurance}
+
+\subsection{Functional Suitability - Functional Correctness}
+
+\textbf{Application:}
+\texttt{findDuplicateGroups} must return groups of size $\geq 2$ scoped to the requested user and path.
+\texttt{KotlinFileDeduplicator} confirms equality via SHA-256 and bytewise comparison to rule out hash collisions.
+\texttt{FrontendGateImpl} ensures every response is a valid JSON object with a \texttt{groups} array on success or a \texttt{message} on error.
+
+\textbf{Tracking:} Automated unit tests.
+
+\textbf{Ensured by:} \texttt{KotlinFileDeduplicatorTest} verifies group count, path scoping, and user isolation.
+\texttt{FrontendGateImplTest} verifies JSON structure and stream cardinality.
+
+\subsection{Maintainability - Modularity}
+
+\textbf{Application:}
+All deduplication logic is behind \texttt{FileDeduplicator}; \texttt{FrontendGateImpl} never imports engine or OpenCV types directly.
+Swapping to a C-backed engine or a different JSON library touches one class only.
+Extension functions (\texttt{VirtualFileSystemExtensions}, \texttt{PathExtensions}) add behaviour to external types, keeping engine classes clean.
+
+\textbf{Tracking:} Enforced by code review: any new engine must implement \texttt{FileDeduplicator} and be wired only in \texttt{FileDeduplicationBootstrapImpl}.
+
+\textbf{Ensured by:} Interface-based design and the Strategy pattern prevent direct coupling between the routing layer and concrete implementations.
+
+\subsection{Reliability - Fault Tolerance}
+
+\textbf{Application:}
+\texttt{FrontendGateImpl} catches exceptions and returns a well-formed error response, so callers never receive a raw exception.
+\texttt{ImageFileDeduplicator} silently skips non-image files when OpenCV returns an empty \texttt{Mat}, so one bad file cannot abort the entire indexing pass.
+
+\textbf{Tracking:} Automated tests.
+
+\textbf{Ensured by:} \texttt{FrontendGateImplTest} covers invalid input combinations.
+\texttt{ImageFileDeduplicatorTest} verifies that non-image files are skipped without error.

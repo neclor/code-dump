@@ -1,0 +1,16 @@
+[versions]
+kotlin = "2.3.20"
+filededup-interfaces = "1.0.0"
+shadow = "8.3.6"
+kotlinx-serialization = "1.8.1"
+opencv = "4.9.0-0"
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+
+[libraries]
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+filededup-interfaces = { module = "be.uliege.info0027:filededup-interfaces", version.ref = "filededup-interfaces" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+opencv = { module = "org.openpnp:opencv", version.ref = "opencv" }

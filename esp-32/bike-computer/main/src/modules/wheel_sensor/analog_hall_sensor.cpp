@@ -34,7 +34,7 @@ static void count_revolution(uint64_t now) {
 }
 
 static void sample_task(void* arg) {
-	for (;;) {
+	while (true) {
 		const int deviation_mv = abs((int)analogReadMilliVolts(PIN_WHEEL_SENSOR) - rest_mv);
 
 		if (!magnet_near && deviation_mv > ANALOG_HALL_TRIGGER_MV) {

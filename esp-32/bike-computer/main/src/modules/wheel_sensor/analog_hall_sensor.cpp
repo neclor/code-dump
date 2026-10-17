@@ -16,7 +16,6 @@ static WheelSensorData state;
 static portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
 static int rest_mv;
-static int polarity;
 static bool magnet_near;
 
 /* ======= Static ======= */
@@ -36,9 +35,7 @@ static void count_revolution(uint64_t now) {
 
 static void sample_task(void* arg) {
 	for (;;) {
-		const int raw_deviation_mv = (int)analogReadMilliVolts(PIN_WHEEL_SENSOR) - rest_mv;
-		if (polarity == 0 && abs(raw_deviation_mv) > ANALOG_HALL_TRIGGER_MV) polarity = raw_deviation_mv > 0 ? 1 : -1;
-		const int deviation_mv = raw_deviation_mv * polarity;
+		const int deviation_mv = abs((int)analogReadMilliVolts(PIN_WHEEL_SENSOR) - rest_mv);
 
 		if (!magnet_near && deviation_mv > ANALOG_HALL_TRIGGER_MV) {
 			magnet_near = true;

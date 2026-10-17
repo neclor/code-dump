@@ -9,7 +9,7 @@
 #define AUTO_PAUSE true
 #define DISPLAY_REFRESH_MS 250
 
-#define PIN_BUTTON 33
+#define PIN_BUTTON 19
 #define LONG_PRESS_MS 1000
 
 /* ======= Static ======= */

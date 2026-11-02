@@ -20,6 +20,11 @@ _parameter_data::Dict{String, Float64} = Dict(
 @eval @enum CropName $(Symbol.(unique(_crops_df.crop))...)
 @eval @enum CropGroup $(Symbol.(unique(_crops_df.group))...)
 
+block_names = instances(BlockName)
+crop_names = instances(CropName)
+periods = instances(Period)
+soil_classes = instances(SoilClass)
+
 function parse_enum(E::Type{<:Enum}, str::AbstractString)
     for enum_value in instances(E)
         string(enum_value) == str && return enum_value

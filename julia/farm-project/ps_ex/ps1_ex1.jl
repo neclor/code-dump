@@ -2,10 +2,10 @@
 # Pkg.add("JuMP")
 # Pkg.add("Gurobi")
 
-using JuMP, HiGHS
+using JuMP, Gurobi
 
-# Create a new JuMP model with HiGHS as the solver
-model = Model(HiGHS.Optimizer)
+# Create a new JuMP model with Gurobi as the solver
+model = Model(Gurobi.Optimizer)
 
 # variables
 @variable(model, production_butter >= 0)

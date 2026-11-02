@@ -1,3 +1,5 @@
+using CSV, DataFrames
+
 _blocks_df = CSV.read("data/blocks.csv", DataFrame)
 _calendar_df = CSV.read("data/calendar.csv", DataFrame)
 _crops_df = CSV.read("data/crops.csv", DataFrame)
@@ -175,6 +177,7 @@ labour_data::Dict{Period, LabourData} = Dict(
 )
 
 # ======= Rules ======= #
+
 struct RulesData
     non_productive_share::Float64
 

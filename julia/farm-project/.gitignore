@@ -41,6 +41,3 @@ JuliaLocalPreferences.toml
 # OS files
 .DS_Store
 .directory
-
-# AI
-.claude/

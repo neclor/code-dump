@@ -1,4 +1,4 @@
-using JuMP, HiGHS, CSV, DataFrames
+using JuMP, Gurobi, CSV, DataFrames
 
 # Data
 hours = 1:24
@@ -11,8 +11,8 @@ cost = [20, 25, 18]      # Cost per MW for each unit
 demand_df = CSV.read(joinpath(@__DIR__, "demand_data.csv"), DataFrame)
 demand = [demand_df[hour, 1] for hour in hours]  # Demand for each hour
 
-# Create a new JuMP model with HiGHS as the solver
-model = Model(HiGHS.Optimizer)
+# Create a new JuMP model with Gurobi as the solver
+model = Model(Gurobi.Optimizer)
 
 # Variables: Create a matrix of variables where x[i,j] represents unit i's usage at hour j
 @variable(model, 0 <= x[1:num_units, hours] <= 1)

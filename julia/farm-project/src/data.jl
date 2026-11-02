@@ -1,14 +1,16 @@
 using CSV, DataFrames
 
-_blocks_df = CSV.read("data/blocks.csv", DataFrame)
-_calendar_df = CSV.read("data/calendar.csv", DataFrame)
-_crops_df = CSV.read("data/crops.csv", DataFrame)
-_initial_areas_df = CSV.read("data/initial_areas.csv", DataFrame)
-_labour_df = CSV.read("data/labour.csv", DataFrame)
-_markets_df = CSV.read("data/markets.csv", DataFrame)
-_parameters_df = CSV.read("data/parameters.csv", DataFrame)
-_water_df = CSV.read("data/water.csv", DataFrame)
-_yields_df = CSV.read("data/yields.csv", DataFrame)
+_data_dir = joinpath(@__DIR__, "..", "data")
+
+_blocks_df = CSV.read(joinpath(_data_dir, "blocks.csv"), DataFrame)
+_calendar_df = CSV.read(joinpath(_data_dir, "calendar.csv"), DataFrame)
+_crops_df = CSV.read(joinpath(_data_dir, "crops.csv"), DataFrame)
+_initial_areas_df = CSV.read(joinpath(_data_dir, "initial_areas.csv"), DataFrame)
+_labour_df = CSV.read(joinpath(_data_dir, "labour.csv"), DataFrame)
+_markets_df = CSV.read(joinpath(_data_dir, "markets.csv"), DataFrame)
+_parameters_df = CSV.read(joinpath(_data_dir, "parameters.csv"), DataFrame)
+_water_df = CSV.read(joinpath(_data_dir, "water.csv"), DataFrame)
+_yields_df = CSV.read(joinpath(_data_dir, "yields.csv"), DataFrame)
 
 _parameter_data::Dict{String, Float64} = Dict(
     row.parameter => row.value for row in eachrow(_parameters_df)

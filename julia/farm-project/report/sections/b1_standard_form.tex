@@ -1,0 +1,37 @@
+\subsection*{B.1 \quad Standard form and dual}
+
+\textbf{Standard form} $\ \min\{c^\top x:\ Ax=b,\ x\ge 0\}$, with $z_k\ge 0$ added to each inequality:
+\begin{align*}
+\min\ \ & \textstyle\sum_c v_c\,T_c-\sum_c\big[(P_c-F_c)\,s_c+F_c\,Q_c\big]+\sum_t o_t\,h_t+e\sum_t p_t\\[4pt]
+\text{s.t.}\quad
+(1)\ \ & \textstyle\sum_c a_{bc}=A_b\\
+(2)\ \ & T_c+z_2=80\,m_c\\
+(3)\ \ & T_{\text{fallow}}-z_3=80\,\sigma\\
+(4a)\ \ & s_c-z_{4a}=N_c\\
+(4b)\ \ & s_c+z_{4b}=X_c\\
+(4c)\ \ & s_c-Q_c+z_{4c}=0\\
+(5)\ \ & l_t-l_{t-1}-p_t+W_t+w_t=i_t\\
+(6a)\ \ & l_t+z_{6a}=K\\
+(6b)\ \ & p_t+z_{6b}=u_t\\
+(7a)\ \ & \textstyle\sum_t p_t+z_{7a}=L\\
+(7b)\ \ & l_4-z_{7b}=l_T\\
+(8a)\ \ & H_t-h_t+z_{8a}=f_t\\
+(8b)\ \ & h_t+z_{8b}=k_t\\[4pt]
+& a_{bc},\ s_c,\ p_t,\ l_t,\ w_t,\ h_t,\ z_k\ \ge\ 0
+\end{align*}
+
+\textbf{Dual} $\ \max\{b^\top\pi:\ A^\top\pi\le c\}$, one free variable $\pi_k$ for each row $(k)$:
+\begin{multline*}
+\max\ \sum_b A_b\pi_1+80\sum_c m_c\pi_2+80\sigma\,\pi_3+\sum_c N_c\pi_{4a}+\sum_c X_c\pi_{4b}+\sum_t i_t\pi_5+l_0\pi_5\\
++K\sum_t\pi_{6a}+\sum_t u_t\pi_{6b}+L\pi_{7a}+l_T\pi_{7b}+\sum_t f_t\pi_{8a}+\sum_t k_t\pi_{8b}
+\end{multline*}
+\begin{align*}
+a_{bc}:\ \ &\pi_1+\pi_2+[c{=}\text{fallow}]\,\pi_3-y_{bc}\,\pi_{4c}+\textstyle\sum_t\big(g_{ct}\,\pi_5+n_{ct}\,\pi_{8a}\big)\le v_c-F_c\,y_{bc}\\
+s_c:\ \ &\pi_{4a}+\pi_{4b}+\pi_{4c}\le F_c-P_c\\
+p_t:\ \ &-\pi_5+\pi_{6b}+\pi_{7a}\le e\\
+l_t:\ \ &\pi_5(t)-\pi_5(t{+}1)+\pi_{6a}+[t{=}4]\,\pi_{7b}\le 0\\
+w_t:\ \ &\pi_5\le 0\\
+h_t:\ \ &-\pi_{8a}+\pi_{8b}\le o_t\\
+z_2,z_{4b},z_{4c},z_{6a},z_{6b},z_{7a},z_{8a},z_{8b}:\ \ &\pi_k\le 0\\
+z_3,z_{4a},z_{7b}:\ \ &-\pi_k\le 0
+\end{align*}

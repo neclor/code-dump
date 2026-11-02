@@ -1,0 +1,9 @@
+\subsection*{B.5 \quad Primal and dual simplex}
+
+\input{tables/b_simplex}
+
+\begin{itemize}
+\item \textbf{Comparison.} Same optimum. 29 against 39 iterations, and the times are about 0. With 35 rows and 50 columns this proves nothing about which method is better: the counts depend on the start basis and on the solver's choices, and every run takes milliseconds.
+\item \textbf{+10 family hours in autumn} changes only the right-hand side $b$. The old basis stays dual feasible and may lose primal feasibility. The \textbf{dual simplex} is made for this case: it starts from the old basis and repairs it. Both methods need only 2--3 iterations from the old basis, against 29--39 from scratch.
+\item The margin grows by $314.18$ EUR ($31.4$ EUR/h), less than the price $36.4$, because the basis changes after some hours.
+\end{itemize}

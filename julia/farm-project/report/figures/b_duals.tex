@@ -1,0 +1,14 @@
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[group style={group size=3 by 1, horizontal sep=1.4cm}, width=5.4cm, height=3.7cm, ymin=0, enlarge x limits=0.2, nodes near coords, nodes near coords style={font=\tiny}]
+\nextgroupplot[ybar, bar width=10pt, symbolic x coords={B1,B2,B3,B4}, xtick=data, title={land $\alpha_b$ (EUR/ha)}, ymax=980, every node near coord/.append style={/pgf/number format/.cd,fixed,precision=0}]
+\addplot[fill=cmaize] coordinates {(B1,793.01)(B2,641.01)(B3,563.01)(B4,809.01)};
+\nextgroupplot[ybar, bar width=10pt, symbolic x coords={P1,P2,P3,P4}, xtick=data, title={water $\beta_t$ (EUR/m$^3$)}, ymax=0.9, every node near coord/.append style={/pgf/number format/.cd,fixed,precision=2}]
+\addplot[fill=cbarley] coordinates {(P1,0)(P2,0.69)(P3,0.69)(P4,0.69)};
+\nextgroupplot[ybar, bar width=10pt, symbolic x coords={P1,P2,P3,P4}, xtick=data, title={family hour $\gamma_t$ (EUR/h)}, ymax=46, every node near coord/.append style={/pgf/number format/.cd,fixed,precision=1}]
+\addplot[fill=cwheat] coordinates {(P1,0)(P2,0)(P3,0)(P4,36.40)};
+\end{groupplot}
+\end{tikzpicture}
+\caption{Dual variables of the land, reservoir and labour constraints.}
+\end{figure}

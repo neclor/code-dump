@@ -1,0 +1,35 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[margin=1.9cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage[font=small,labelfont=bf,skip=2pt]{caption}
+\usepackage{pgfplots}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=1.16}
+
+\setlist{itemsep=1pt,topsep=2pt,parsep=0pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+\renewcommand{\arraystretch}{0.95}
+
+% crop colours, the same in all figures
+\definecolor{cwheat}{HTML}{E69F00}
+\definecolor{cbarley}{HTML}{56B4E9}
+\definecolor{cmaize}{HTML}{009E73}
+\definecolor{cbeet}{HTML}{CC79A7}
+\definecolor{cpotato}{HTML}{8B5A2B}
+\definecolor{cbeans}{HTML}{0072B2}
+\definecolor{cfallow}{HTML}{BBBBBB}
+
+\pgfplotsset{
+  every axis/.append style={font=\footnotesize, tick label style={font=\scriptsize}, label style={font=\scriptsize}, legend style={font=\scriptsize}},
+}
+
+\title{Cropping Plan and Rotation of a Family Farm}
+\author{Introduction to Numerical Optimization -- Project 2026\\[2pt]
+Group members: \textit{Aleksandr Pavlov (s2400691)}}
+\date{}

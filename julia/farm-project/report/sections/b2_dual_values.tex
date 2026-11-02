@@ -1,0 +1,12 @@
+\subsection*{B.2 \quad Meaning of the dual variables}
+
+We show each price as a gain of the margin when the right-hand side grows by one unit; this is $-\pi$ of B.1 (for every row;\texttt{src/print\_b.jl}). Let $\alpha_b=-\pi_1$ be the price of land, $\beta_t=-\pi_5$ of water in the reservoir, $\gamma_t=-\pi_{8a}$ of a family hour.
+
+\input{figures/b_duals}
+
+\begin{itemize}
+\item \textbf{Land} $\alpha_b$ (EUR/ha): one more hectare is worth 793, 641, 563, 809 EUR on B1--B4.\item \textbf{Water} $\beta_t$ (EUR/m$^3$): 0 in P1, 0.69 in P2--P4. This is $0.60$ (price of the permit) $+\,0.09$ (pumping cost): an extra m$^3$ saves one pumped m$^3$.
+\item \textbf{Labour} $\gamma_t$ (EUR/h): 0 in P1--P3, 36.40 in autumn. This is the wage $24$ plus $12.40$ for the hiring cap, which is reached.
+\end{itemize}
+
+\textbf{Why is water worth 0 in P1?} The reservoir is full and 1\,500 m$^3$ overflow, so one more m$^3$ in spring is lost. From P2 on, stored water replaces pumped water, which is limited by the permit, so it has a value.

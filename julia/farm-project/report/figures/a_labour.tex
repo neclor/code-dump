@@ -1,0 +1,12 @@
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=7cm, height=4.2cm, ybar stacked, bar width=14pt, symbolic x coords={P1,P2,P3,P4}, xtick=data, ymin=0, ymax=800, ylabel={hours}, enlarge x limits=0.2, legend style={at={(1.04,0.5)},anchor=west}, legend cell align=left]
+\addplot[fill=cmaize]  coordinates {(P1,328.29)(P2,204.43)(P3,281.24)(P4,420)};
+\addplot[fill=cwheat]  coordinates {(P1,0)(P2,0)(P3,0)(P4,125)};
+\addplot[thick,mark=*,sharp plot,stack plots=false] coordinates {(P1,520)(P2,470)(P3,500)(P4,420)};
+\legend{family hours used,hired hours,family hours available}
+\end{axis}
+\end{tikzpicture}
+\caption{Labour. The family has spare hours in P1--P3. In autumn it is short, so the maximum of $125$~h is hired.}
+\end{figure}

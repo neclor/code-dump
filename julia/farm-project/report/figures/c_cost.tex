@@ -1,0 +1,9 @@
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=10cm, height=5cm, xbar, bar width=8pt, symbolic y coords={only legume,only preceding crop,only return period,without legume,without preceding crop,without return period,all three rules,no rules}, ytick=data, xmin=0, xmax=21000, scaled x ticks=false, xticklabel style={/pgf/number format/.cd,fixed,precision=0,1000 sep={}}, xlabel={loss against ``no rules'' (EUR)}, nodes near coords, nodes near coords style={font=\tiny,/pgf/number format/.cd,fixed,precision=0,1000 sep={}}, enlarge y limits=0.1]
+\addplot[fill=cbeet] coordinates {(9711.06,only legume)(1479.86,only preceding crop)(9106.76,only return period)(9106.76,without legume)(17096.04,without preceding crop)(10618.24,without return period)(17096.04,all three rules)(0,no rules)};
+\end{axis}
+\end{tikzpicture}
+\caption{Cost of the rules, in each case against the plan without any rule ($357\,029.70$ EUR).}
+\end{figure}

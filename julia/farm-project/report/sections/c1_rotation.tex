@@ -1,0 +1,19 @@
+\subsection*{C.1 \quad Three years with the rules}
+
+Variables get an upper index $y=1,2,3$ ($a^y_{bc}$, $G^y$). Constraints (1)--(8) hold in every year. The reservoir carries over, $l^y_0=l^{y-1}_4$; the reserve $l_4^3\ge l_T$ is required only after year 3. The history $a^0_{bc}$ is data. With discount rate $\rho=0.03$:
+\[
+\max\ \sum_{y=1}^{3}\frac{G^y}{(1+\rho)^{y-1}}.
+\]
+
+\smallskip
+\noindent\begin{tabular}{@{}r@{\hspace{0.8em}}l@{\hspace{0.8em}}p{6.2cm}@{}}
+(9) & $a^{y-1}_{bc}+a^{y}_{bc}\le r_c\,A_b\ \ \forall b,c$ & return period ($r_c$ = return share)\\[2pt]
+(10) & $a^{y}_{b,\text{potato}}\le \sum_{c\in\text{cereals}}a^{y-1}_{bc}\ \ \forall b$ & potato only after cereals\\[2pt]
+(11) & $\sum_{c\in\text{legumes}}T^{y}_c\ge 80\,\lambda$ & legumes ($\lambda=0.1$: 8 ha of beans)\\
+\end{tabular}
+
+\smallskip
+Year 0 appears only in (9) and (10) for $y=1$, as numbers. Code: \texttt{src/c.jl}. The discounted gross margin is \textbf{339\,933.66 EUR}.
+
+\input{tables/c_plans}
+\input{figures/c_years}

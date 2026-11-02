@@ -1,0 +1,23 @@
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=8.6cm, height=5cm, ybar stacked, bar width=14pt, symbolic x coords={year 0 (history),year 1,year 2,year 3}, xtick=data, ymin=0, ymax=85, ylabel={farm area (ha)}, enlarge x limits=0.15, legend style={at={(1.03,0.5)},anchor=west}, title={Crops on the farm in each year}]
+\addplot[fill=cwheat]  coordinates {(year 0 (history),31)(year 1,32)(year 2,32)(year 3,32)};
+\addplot[fill=cbarley] coordinates {(year 0 (history),18)(year 1,5.68)(year 2,5)(year 3,7)};
+\addplot[fill=cmaize]  coordinates {(year 0 (history),6)(year 1,0.16)(year 2,5.07)(year 3,2.23)};
+\addplot[fill=cbeet]   coordinates {(year 0 (history),14)(year 1,15.7)(year 2,11.26)(year 3,12.31)};
+\addplot[fill=cpotato] coordinates {(year 0 (history),6)(year 1,15.26)(year 2,15.47)(year 3,15.26)};
+\addplot[fill=cbeans]  coordinates {(year 0 (history),5)(year 1,8)(year 2,8)(year 3,8)};
+\addplot[fill=cfallow] coordinates {(year 0 (history),0)(year 1,3.2)(year 2,3.2)(year 3,3.2)};
+\legend{wheat,barley,maize,beet,potato,beans,fallow}
+\end{axis}
+\end{tikzpicture}%
+\begin{tikzpicture}
+\begin{axis}[width=6.4cm, height=5cm, ybar, bar width=14pt, symbolic x coords={year 1,year 2,year 3}, xtick=data, ymin=110000, ymax=124000, ylabel={margin (EUR)}, scaled y ticks=false, yticklabel style={/pgf/number format/.cd,fixed,precision=0,1000 sep={}}, enlarge x limits=0.25, title={Gross margin of each year}, legend style={at={(0.5,-0.2)},anchor=north,legend columns=2}]
+\addplot[fill=cmaize] coordinates {(year 1,117879.15)(year 2,114843.90)(year 3,117288.42)};
+\addplot[fill=cwheat] coordinates {(year 1,122767.73)(year 2,122767.73)(year 3,122077.77)};
+\legend{with rules,without rules}
+\end{axis}
+\end{tikzpicture}
+\caption{Left: crops on the whole farm; the history (year 0) grows $14$ ha of beet and $6$ ha of potato, the plan switches to potato and beans. Right: yearly margins ($117\,879.15$, $114\,843.90$, $117\,288.42$ EUR; weights $1$, $0.9709$, $0.9426$).}
+\end{figure}

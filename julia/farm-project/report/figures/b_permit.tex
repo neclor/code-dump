@@ -1,0 +1,24 @@
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=8.4cm, height=5.2cm, xlabel={$L$ (m$^3$)}, ylabel={gross margin (EUR)}, xmin=3000, xmax=12000, ymin=110000, ymax=123500, xtick={4000,6000,8000,10000,12000}, scaled x ticks=false, xticklabel style={/pgf/number format/.cd,fixed,precision=0,1000 sep={}}, ytick={112000,116000,120000,123000}, scaled y ticks=false, yticklabel style={/pgf/number format/.cd,fixed,precision=0,1000 sep={}}, grid=major, grid style={gray!25}, title={Gross margin as a function of $L$}]
+\addplot[thick,blue] table[col sep=comma, x=L, y=margin] {data/permit_scan.csv};
+\draw[dashed,red] (axis cs:9495.5,110000) -- (axis cs:9495.5,123500);
+\draw[dashed,red] (axis cs:11000,110000) -- (axis cs:11000,123500);
+\node[font=\scriptsize,anchor=north west] at (axis cs:4300,114000) {slope 2.83};
+\node[font=\scriptsize,anchor=north] at (axis cs:8000,120300) {slope 0.69};
+\node[font=\scriptsize,anchor=south west] at (axis cs:11100,122900) {slope 0};
+\end{axis}
+\end{tikzpicture}%
+\begin{tikzpicture}
+\begin{axis}[width=8.4cm, height=5.2cm, xlabel={$L$ (m$^3$)}, ylabel={farm area (ha)}, xmin=9000, xmax=11500, ymin=0, ymax=17, xtick={9000,9500,10000,10500,11000}, scaled x ticks=false, xticklabel style={/pgf/number format/.cd,fixed,precision=0,1000 sep={}}, grid=major, grid style={gray!25}, title={Areas as functions of $L$}, legend style={at={(0.5,0.52)},anchor=center,legend columns=1}]
+\addplot[thick,cbarley,mark=*] coordinates {(9000,14.407)(9495.5,13.324)(9600,13.08)(10000,12.145)(10500,10.977)(11000,9.809)(11500,9.809)};
+\addplot[thick,cmaize,mark=*] coordinates {(9000,0)(9495.5,1.476)(9600,1.896)(10000,3.504)(10500,5.513)(11000,7.522)(11500,7.522)};
+\addplot[thick,cbeet,mark=*] coordinates {(9000,15.483)(9495.5,15.106)(9600,14.931)(10000,14.258)(10500,13.417)(11000,12.575)(11500,12.575)};
+\draw[dashed,red] (axis cs:9495.5,0) -- (axis cs:9495.5,17);
+\draw[dashed,red] (axis cs:11000,0) -- (axis cs:11000,17);
+\legend{barley,maize,beet}
+\end{axis}
+\end{tikzpicture}
+\caption{Left: margin against $L$ (red: ends of the interval). Right: inside the interval the areas are straight lines.}
+\end{figure}

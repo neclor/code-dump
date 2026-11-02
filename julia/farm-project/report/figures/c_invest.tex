@@ -1,0 +1,21 @@
+\begin{figure}[!ht]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[group style={group size=3 by 1, horizontal sep=1.5cm}, width=5.7cm, height=4.5cm, ymin=0, grid=major, grid style={gray!25}]
+\nextgroupplot[title={rent of land (EUR/ha/year)}, xlabel={ha rented}, xmin=0, xmax=30, ymax=900, legend style={at={(0.97,0.97)},anchor=north east,font=\tiny}]
+\addplot[const plot,thick,cmaize]  coordinates {(0,835.9)(2,797.5)(3,593.6)(4,502.9)(5,377.0)(6,345.8)(11,309.2)(12,273.7)(13,252.6)(14,243.0)(17,237.9)(18,224.4)(21,187.5)(22,172.7)(23,164.7)(30,164.7)};
+\addplot[const plot,thick,cbeans]  coordinates {(0,690.3)(2,631.8)(3,403.4)(4,298.9)(5,177.8)(7,172.3)(8,167.3)(10,162.8)(11,157.7)(24,137.7)(25,131.9)(26,128.1)(27,124.2)(30,124.2)};
+\addplot[const plot,thick,cpotato] coordinates {(0,596.9)(2,578.8)(3,307.7)(4,213.9)(5,94.4)(6,91.3)(7,88.1)(10,70.6)(11,27.4)(12,17.1)(13,14.0)(14,12.7)(30,12.7)};
+\addplot[const plot,thick,cwheat]  coordinates {(0,793.6)(2,752.5)(3,512.6)(4,404.4)(5,287.9)(8,279.9)(10,274.0)(11,268.3)(24,249.9)(25,237.3)(27,232.0)(30,232.0)};
+\addplot[dashed,red,no marks] coordinates {(0,400)(30,400)};
+\legend{B1,B2,B3,B4,rent 400}
+\nextgroupplot[title={bigger reservoir (EUR/m$^3$/year)}, xlabel={m$^3$ added}, xmin=0, xmax=3000, ymax=0.9]
+\addplot[const plot,thick,cbarley] coordinates {(0,0.718)(250,0.612)(500,0.579)(1000,0.543)(1250,0.528)(1500,0.012)(2500,0.006)(2750,0)(3000,0)};
+\addplot[dashed,red,no marks] coordinates {(0,0.40)(3000,0.40)};
+\nextgroupplot[title={autumn hours saved (EUR/h/year)}, xlabel={hours saved per year}, xmin=0, xmax=200, ymax=40]
+\addplot[const plot,thick,cwheat] coordinates {(0,24.0)(110,21.6)(120,7.6)(130,0)(200,0)};
+\end{groupplot}
+\end{tikzpicture}
+\caption{Value of one more unit per year (solid) and the assumed price per year (dashed): rent 400 EUR/ha, reservoir annuity 0.40 EUR/m$^3$.}
+\label{fig:invest}
+\end{figure}

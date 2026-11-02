@@ -125,3 +125,105 @@ set_normalized_rhs.(return_period_c, original_return_period)
 set_normalized_rhs.(preceding_crop_c, original_preceding_crop)
 set_normalized_rhs.(legume_c, original_legume)
 optimize!(model)
+
+base_margin = objective_value(model)
+
+tight_constraints = []
+for group in (abstraction_permit_c, labour_limit_c, hired_cap_c, contract_max_c, land_c)
+    for constraint in group
+        if isapprox(value(constraint), normalized_rhs(constraint))
+            push!(tight_constraints, constraint)
+        end
+    end
+end
+
+results = []
+for constraint in tight_constraints
+    rhs = normalized_rhs(constraint)
+    extra = 0.1 * rhs
+    set_normalized_rhs(constraint, rhs + extra)
+    optimize!(model)
+    push!(results, (name = name(constraint), extra = extra, gain = objective_value(model) - base_margin))
+    set_normalized_rhs(constraint, rhs)
+end
+optimize!(model)
+
+println("\nInvestments: a constraint at its limit is increased by 10% (EUR, discounted, one year)")
+println(rpad("constraint", 36), rpad("extra", 12), rpad("gain", 14), "gain per unit")
+for result in sort(results, by = result -> result.gain, rev = true)
+    println(rpad(result.name, 36), rpad(round(result.extra, digits = 2), 12), rpad(round(result.gain, digits = 2), 14), round(result.gain / result.extra, digits = 2))
+end
+
+# ======= Investments ======= #
+
+autumn = periods[end]
+
+function rent_land(block, extra)
+    for year in years
+        set_normalized_rhs(land_c[year, block], block_data[block].area_ha + extra)
+        set_normalized_rhs(non_productive_minimum_c[year], rules_data.non_productive_share * (farm_area_ha + extra))
+        set_normalized_rhs(legume_c[year], rules_data.legume_share * (farm_area_ha + extra))
+        for crop in crop_names
+            set_normalized_rhs(diversification_c[year, crop], crop_data[crop].max_farm_share * (farm_area_ha + extra))
+            set_normalized_rhs(return_period_c[year, block, crop], original_return_period[year, block, crop] + crop_data[crop].return_share * extra)
+        end
+    end
+end
+
+function enlarge_reservoir(extra)
+    for year in years, period in periods
+        set_upper_bound(level[year, period], water_data.reservoir_capacity_m3 + extra)
+    end
+end
+
+function add_autumn_hours(extra)
+    for year in years
+        set_normalized_rhs(labour_limit_c[year, autumn], labour_data[autumn].family_hours + extra)
+    end
+end
+
+function add_permit(extra)
+    for year in years
+        set_normalized_rhs(abstraction_permit_c[year], water_data.abstraction_licence_m3 + extra)
+    end
+end
+
+investments = []
+for block in block_names
+    push!(investments, ("rent of land on " * string(block) * ", ha", extra -> rent_land(block, extra), 0:1:30))
+end
+push!(investments, ("reservoir, m3", enlarge_reservoir, 0:250:5000))
+push!(investments, ("family hours in autumn, h per year", add_autumn_hours, 0:10:400))
+push!(investments, ("abstraction permit, m3 per year", add_permit, 0:250:5000))
+
+
+first_values = []
+for (title, change, amounts) in investments
+    gains = []
+    for amount in amounts
+        change(amount)
+        optimize!(model)
+        push!(gains, objective_value(model) - base_margin)
+    end
+    change(0)
+    optimize!(model)
+
+    values = diff(gains) ./ diff(amounts) ./ sum(discount_factors)
+
+    println("\n", title)
+    println(rpad("from", 10), rpad("up to", 10), "value per unit and year")
+    piece_start = 1
+    for k in 2:length(values) + 1
+        if k > length(values) || !isapprox(values[k], values[piece_start], rtol = 0.02, atol = 1e-3)
+            println(rpad(amounts[piece_start], 10), rpad(amounts[k], 10), round(values[piece_start], digits = 3))
+            piece_start = k
+        end
+    end
+    push!(first_values, (title = title, value = values[1], total_gain = gains[end]))
+end
+
+println("\nValue of the first unit, the highest price worth paying")
+println(rpad("investment", 38), "EUR per unit and year")
+for item in sort(first_values, by = item -> item.value, rev = true)
+    println(rpad(item.title, 38), round(item.value, digits = 3))
+end

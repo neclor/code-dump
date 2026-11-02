@@ -1,105 +1,43 @@
-% =====================================================================
-\section{Part A: the coming year}
-% =====================================================================
+\subsection*{A.1 \quad The linear program}
 
-\subsection{The linear program}
+Indices: $b$ block (B1--B4), $c$ crop, $t$ period (1 = spring, \dots, 4 = autumn). Units: ha, m$^3$, h, t, EUR.
 
-\paragraph{Sets.}
-\begin{itemize}
-  \item $B$: the four blocks $B1,\dots,B4$. $\sigma(b)$ is the soil class of block $b$.
-  \item $C$: the seven crops (winter wheat, winter barley, grain maize, sugar beet, potato, field beans, cover fallow).
-  \item $T=\{1,2,3,4\}$: the periods P1 spring, P2 early summer, P3 late summer, P4 autumn.
-  \item $C^{\text{sale}}\subset C$: crops that are sold (all except cover fallow).
-  \item $C^{\min}$: crops with a contract minimum (sugar beet).
-  \item $C^{\max}$: crops with a contract ceiling (sugar beet, potato).
-  \item $C^{\text{spot}}$: crops with a free-market price (sugar beet, potato).
-  \item $C^{\text{np}}$: non-productive crops (cover fallow).
-\end{itemize}
-
-\paragraph{Parameters.}
-All of them are read from the nine data files. $A=\sum_{b}A_b=80$ ha is the farm area.
-
-\begin{center}
-\small
-\begin{tabular}{@{}lll@{}}
-\toprule
-Symbol & Meaning & Unit \\
-\midrule
-$A_b$ & area of block $b$ & ha \\
-$y_{c,s}$ & yield of crop $c$ on soil class $s$ & t/ha \\
-$k_c$ & variable cost of crop $c$ & EUR/ha \\
-$m_c$ & largest share of the farm that crop $c$ may use & --- \\
-$\nu$ & smallest share of the farm left non-productive & --- \\
-$p_c$ & price of crop $c$ (contract price for sugar beet and potato) & EUR/t \\
-$q_c$ & free-market (spot) price, $c\in C^{\text{spot}}$ & EUR/t \\
-$\underline M_c,\ \overline M_c$ & contract minimum and contract ceiling & t \\
-$w_{c,t}$ & irrigation needed by crop $c$ in period $t$ & m$^3$/ha \\
-$l_{c,t}$ & labour needed by crop $c$ in period $t$ & h/ha \\
-$I_t$ & inflow into the reservoir in period $t$ & m$^3$ \\
-$U_t$ & pump capacity in period $t$ & m$^3$ \\
-$\bar R,\ R_0,\ R_{\text{end}}$ & reservoir maximum, start level, required end level & m$^3$ \\
-$L$ & abstraction permit per year & m$^3$ \\
-$\pi$ & pumping cost & EUR/m$^3$ \\
-$F_t$ & family hours in period $t$ & h \\
-$H_t$ & largest number of hired hours in period $t$ & h \\
-$\omega_t$ & wage of hired labour in period $t$ & EUR/h \\
-\bottomrule
+\smallskip
+\noindent\footnotesize
+\begin{tabular}{@{}ll@{\qquad}ll@{\qquad}ll@{}}
+$A_b$ & block area (farm: 80 ha) & $P_c$ & contract price & $i_t$ & reservoir inflow\\
+$y_{bc}$ & yield per ha & $F_c$ & free-market price & $u_t$ & pump capacity\\
+$v_c$ & cost per ha & $N_c,X_c$ & contract min, max & $K,l_0,l_T$ & reservoir size, start, end\\
+$m_c$ & max farm share & $g_{ct},n_{ct}$ & water, hours per ha & $L$ & yearly permit\\
+$\sigma$ & non-productive share & $f_t,k_t,o_t$ & family hours, hire cap, wage & $e$ & pumping cost per m$^3$\\
 \end{tabular}
-\end{center}
+\normalsize
 
-\paragraph{Variables.} All variables are nonnegative.
-\begin{itemize}
-  \item $x_{b,c}$: hectares of crop $c$ on block $b$ (ha).
-  \item $s_c$: tonnes of crop $c$ sold at the price $p_c$, for $c\in C^{\text{sale}}$.
-  \item $u_t$: water pumped in period $t$ (m$^3$), with $u_t\le U_t$.
-  \item $r_t$: reservoir level at the end of period $t$ (m$^3$), with $r_t\le \bar R$.
-  \item $e_t$: inflow lost because the reservoir is full (m$^3$).
-  \item $h_t$: hired hours in period $t$ (h), with $h_t\le H_t$.
-\end{itemize}
-To keep the formulas short we also use four quantities that are computed from $x$:
-\[
-X_c=\sum_{b}x_{b,c},\qquad
-Q_c=\sum_{b}y_{c,\sigma(b)}\,x_{b,c},\qquad
-W_t=\sum_{c}w_{c,t}X_c,\qquad
-N_t=\sum_{c}l_{c,t}X_c .
-\]
-They are the area of crop $c$ on the farm, the tonnes produced, the water used for
-irrigation in period $t$, and the work hours needed in period $t$.
-The tonnes sold on the spot market are $Q_c-s_c$.
+\smallskip
+\textbf{Variables} ($\ge 0$): $a_{bc}$ area of crop $c$ on block $b$; $s_c$ tonnes sold at the contract price; $p_t$ pumped water; $l_t$ reservoir level; $w_t$ spilled water; $h_t$ hired hours.
 
-\paragraph{Objective.} We maximize the gross margin:
+\textbf{Shorthand:} $T_c=\sum_b a_{bc}$ area of crop $c$; $Q_c=\sum_b y_{bc}a_{bc}$ harvest; $W_t=\sum_c g_{ct}T_c$ water used; $H_t=\sum_c n_{ct}T_c$ hours needed. If a crop has one price, $F_c=P_c$.
+
+\textbf{Objective:}
 \[
-\max\ \underbrace{\sum_{c\in C^{\text{sale}}}p_c s_c+\sum_{c\in C^{\text{spot}}}q_c\,(Q_c-s_c)}_{\text{revenue}}
--\underbrace{\sum_{c}k_c X_c}_{\text{crop costs}}
--\underbrace{\sum_{t}\omega_t h_t}_{\text{hired labour}}
--\underbrace{\pi\sum_{t}u_t}_{\text{pumping}} .
+\max\; G=\sum_c\big[P_c\,s_c+F_c\,(Q_c-s_c)\big]-\sum_c v_c\,T_c-\sum_t o_t\,h_t-e\sum_t p_t .
 \]
 
-\paragraph{Constraints.}
-\begin{enumerate}[label=(C\arabic*)]
-  \item \textbf{Land.} $\sum_{c}x_{b,c}=A_b$ for every block $b$.\\
-        Every hectare of a block is used. Land we do not want to farm goes to cover fallow.
-  \item \textbf{Diversification.} $X_c\le m_c\,A$ for every crop $c$.\\
-        No crop may cover more than its allowed share of the farm, so the farm does not depend on one crop.
-  \item \textbf{Non-productive area.} $\sum_{c\in C^{\text{np}}}X_c\ge \nu A$.\\
-        At least 4\% of the farm (3.2 ha) is left non-productive.
-  \item \textbf{Sales.} $s_c\le Q_c$ for $c\in C^{\text{sale}}$; $s_c\ge\underline M_c$ for $c\in C^{\min}$; $s_c\le\overline M_c$ for $c\in C^{\max}$.\\
-        We cannot sell more than we grow. Sugar beet must deliver its contract minimum. The contract price is paid only up to the ceiling; what is left is sold on the spot market.
-  \item \textbf{Reservoir balance.} $r_t=r_{t-1}+I_t+u_t-W_t-e_t$ for $t\in T$, with $r_0=R_0$.\\
-        The water at the end of a period is the water we had, plus the inflow and the pumped water, minus the irrigation, minus the water lost by overflow.
-  \item \textbf{Reservoir capacity.} $0\le r_t\le\bar R$.\\
-        The water level cannot be negative and cannot be higher than the size of the reservoir.
-  \item \textbf{Reserve.} $r_4\ge R_{\text{end}}$.\\
-        The reservoir must be well filled at the end of the year.
-  \item \textbf{Pump and permit.} $0\le u_t\le U_t$ and $\sum_t u_t\le L$.\\
-        The pump has a limit per period, and the permit limits the water taken from the stream in the whole year.
-  \item \textbf{Labour.} $N_t\le F_t+h_t$ and $0\le h_t\le H_t$.\\
-        The work needed in a period is done by the family hours and by hired hours, and hiring is limited.
-\end{enumerate}
+\textbf{Constraints:}
 
-\paragraph{Modelling remarks.}
-\begin{itemize}
-  \item Inside one period, inflow, pumping and irrigation are added together. The capacity applies to the level at the end of the period.
-  \item The variable $e_t$ allows the model to throw away water that does not fit in the reservoir, as the statement says.
-  \item In the data the contract price is higher than the spot price (sugar beet 38 against 22, potato 160 against 92). So the model sells under the contract first, and no extra rule is needed to force this.
-\end{itemize}
+\smallskip
+\noindent\begin{tabular}{@{}r@{\hspace{0.8em}}l@{\hspace{0.8em}}p{8.4cm}@{}}
+(1) & $\sum_c a_{bc}=A_b\ \ \forall b$ & each block is fully sown (fallow = idle land)\\[2pt]
+(2) & $T_c\le 80\,m_c$ & no crop takes too much of the farm\\[2pt]
+(3) & $T_{\text{fallow}}\ge 80\,\sigma$ & some land must rest\\[2pt]
+(4a) & $s_c\ge N_c$ & contract: deliver the minimum\\[2pt]
+(4b) & $s_c\le X_c$ & the contract price is paid up to the ceiling\\[2pt]
+(4c) & $s_c\le Q_c$ & sell at most the harvest\\[2pt]
+(5) & $l_t=l_{t-1}+i_t+p_t-W_t-w_t$ & reservoir balance\\[2pt]
+(6a) & $l_t\le K$ & reservoir size\\[2pt]
+(6b) & $p_t\le u_t$ & pump size\\[2pt]
+(7a) & $\sum_t p_t\le L$ & yearly permit\\[2pt]
+(7b) & $l_4\ge l_T$ & reserve at the end\\[2pt]
+(8a) & $H_t\le f_t+h_t$ & family hours plus hired hours\\[2pt]
+(8b) & $h_t\le k_t$ & limit on hired hours\\
+\end{tabular}

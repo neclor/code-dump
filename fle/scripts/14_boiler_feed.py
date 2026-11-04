@@ -1,0 +1,17 @@
+print('coal collected', collect_coal())
+refuel()
+boiler = get_entity(Prototype.Boiler, Position(x=-12.5, y=30.0))
+move_to(Position(x=-9.5, y=33.5))
+boiler = insert_item(Prototype.Coal, boiler, quantity=min(30, inv(Prototype.Coal)))
+print('boiler fuel now', boiler.fuel)
+
+# chest + inserter feeding the boiler from the right side
+craft_item(Prototype.Inserter, quantity=1)
+ins = place_entity(Prototype.Inserter, direction=Direction.LEFT, position=Position(x=-10.5, y=30.5))
+print('inserter', ins.position, ins.pickup_position, ins.drop_position)
+chest = place_entity(Prototype.WoodenChest, position=ins.pickup_position)
+print(connect_entities(Position(x=-8.5, y=24.5), ins, Prototype.SmallElectricPole))
+chest = insert_item(Prototype.Coal, chest, quantity=inv(Prototype.Coal))
+print('chest', chest.position, chest.inventory)
+sleep(5)
+print('inserter', get_entity(Prototype.Inserter, ins.position).status)

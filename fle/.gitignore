@@ -1,0 +1,7 @@
+.env
+.fle/
+agentd.log
+agentd.err
+researchd.log
+researchd.err
+__pycache__/

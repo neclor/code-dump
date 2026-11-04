@@ -1,0 +1,11 @@
+craft_item(Prototype.Inserter, quantity=1)
+craft_item(Prototype.IronChest, quantity=1)
+go(Position(x=-9.5, y=32.5))
+ins = place_entity(Prototype.Inserter, direction=Direction.LEFT, position=Position(x=-11.5, y=30.5))
+place_entity(Prototype.SmallElectricPole, position=Position(x=-10.5, y=29.5))
+chest = place_entity(Prototype.IronChest, position=ins.pickup_position)
+chest = insert_item(Prototype.Coal, chest, quantity=max(1, inv(Prototype.Coal) - 5))
+BOILER_CHEST = chest.position
+print('boiler chest', BOILER_CHEST, chest.inventory, ins.drop_position)
+b = get_entity(Prototype.Boiler, Position(x=-13.5, y=30.0))
+print('boiler', b.status, b.fuel)

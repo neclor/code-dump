@@ -1,0 +1,2194 @@
+=== 2026-11-03T15:59:23 [-c] reward=12713
+
+try:
+    craft_item(Prototype.AssemblingMachine1, quantity=1); print('assembler ok')
+except Exception as e: print('no assembler', str(e)[:120])
+print(inspect_inventory())
+
+--- output
+3: ('assembler ok',)
+5: (Inventory(small-electric-pole=4, pipe=12, assembling-machine-1=1, wood=21, coal=42, stone=5, iron-ore=4, iron-plate=123, copper-plate=195, copper-cable=1),)
+
+=== 2026-11-03T15:59:43 [scripts\10_science_chain.py] reward=14725
+lab = get_entity(Prototype.Lab, Position(x=-6.5, y=24.5))
+craft_item(Prototype.AssemblingMachine1, quantity=1)
+craft_item(Prototype.Inserter, quantity=3)
+craft_item(Prototype.SmallElectricPole, quantity=4)
+move_to(Position(x=lab.position.x + 5, y=lab.position.y - 4))
+
+sci = place_entity_next_to(Prototype.AssemblingMachine1, reference_position=lab.position, direction=Direction.UP, spacing=1)
+sci = set_entity_recipe(sci, Prototype.AutomationSciencePack)
+print('science asm', sci.position)
+gear = place_entity_next_to(Prototype.AssemblingMachine1, reference_position=sci.position, direction=Direction.UP, spacing=1)
+gear = set_entity_recipe(gear, Prototype.IronGearWheel)
+print('gear asm', gear.position)
+
+# inserter lab<-science, science<-gear (gap rows between the machines)
+ins1 = place_entity(Prototype.Inserter, direction=Direction.DOWN, position=Position(x=lab.position.x, y=(lab.position.y + sci.position.y) / 2))
+ins2 = place_entity(Prototype.Inserter, direction=Direction.DOWN, position=Position(x=lab.position.x, y=(sci.position.y + gear.position.y) / 2))
+print('ins1', ins1.position, ins1.pickup_position, ins1.drop_position)
+print('ins2', ins2.position, ins2.pickup_position, ins2.drop_position)
+
+# power: poles next to the machines, linked to the existing network
+for e in (sci, gear):
+    print(connect_entities(lab, e, Prototype.SmallElectricPole))
+
+# feed by hand: iron into the gear asm, copper into the science asm
+gear = insert_item(Prototype.IronPlate, gear, quantity=60)
+sci = insert_item(Prototype.CopperPlate, sci, quantity=40)
+sleep(10)
+for e, p in ((gear, Prototype.AssemblingMachine1), (sci, Prototype.AssemblingMachine1)):
+    print(get_entity(p, e.position).status)
+print('lab', get_entity(Prototype.Lab, lab.position).status)
+
+--- output
+9: ('science asm', Position(x=-6.5, y=20.5))
+12: ('gear asm', Position(x=-6.5, y=16.5))
+17: ('ins1', Position(x=-6.5, y=22.5), Position(x=-6.5, y=21.5), Position(x=-6.5, y=23.5))
+18: ('ins2', Position(x=-6.5, y=18.5), Position(x=-6.5, y=17.5), Position(x=-6.5, y=19.5))
+22: (	ElectricityGroup(id=1, poles=[(x=-5.5,y=22.5),(x=-10.5,y=24.5),(x=-8.5,y=24.5)], voltage=6005199),)
+22: (	ElectricityGroup(id=1, poles=[(x=-7.5,y=18.5),(x=-10.5,y=24.5),(x=-8.5,y=24.5),(x=-7.5,y=22.5),(x=-5.5,y=22.5)], voltage=6012547),)
+29: (EntityStatus.WORKING,)
+29: (EntityStatus.WORKING,)
+30: ('lab', EntityStatus.NO_RESEARCH_IN_PROGRESS)
+
+=== 2026-11-03T16:00:08 [scripts\11_tend.py] reward=15206
+RESEARCH_ORDER = [
+    Technology.Logistics, Technology.LogisticsSciencePack, Technology.SteelProcessing,
+    Technology.Electronics, Technology.FastInserter, Technology.AdvancedMaterialProcessing,
+    Technology.ElectricEnergy, Technology.OilProcessing, Technology.Plastics,
+    Technology.AdvancedElectronics, Technology.SulfurProcessing,
+]
+
+def research_next():
+    for t in RESEARCH_ORDER:
+        try:
+            set_research(t)
+            return t
+        except Exception:
+            continue
+    return None
+
+def collect_coal():
+    got = 0
+    for c in get_entities({Prototype.WoodenChest}):
+        n = c.inventory[Prototype.Coal] if c.inventory else 0
+        if n:
+            move_to(c.position.right().right())
+            got += extract_item(Prototype.Coal, c, quantity=n)
+    return got
+
+def feed_science(iron=60, copper=40):
+    for a in get_entities({Prototype.AssemblingMachine1}):
+        r = a.recipe.name if a.recipe else None
+        if r == 'iron-gear-wheel' and inv(Prototype.IronPlate) >= iron:
+            move_to(a.position.right().right().right())
+            insert_item(Prototype.IronPlate, a, quantity=iron)
+        elif r == 'automation-science-pack' and inv(Prototype.CopperPlate) >= copper:
+            move_to(a.position.right().right().right())
+            insert_item(Prototype.CopperPlate, a, quantity=copper)
+
+def tend():
+    c = collect_plates()
+    k = collect_coal()
+    refuel()
+    feed_science()
+    print('tend: plates', c, 'coal', k, inspect_inventory())
+
+print('research', research_next())
+tend()
+
+--- output
+43: ('research', <Technology.Logistics: 'logistics'>)
+44: ('tend: plates', 399, 'coal', 123, Inventory(inserter=1, small-electric-pole=5, pipe=12, wood=19, coal=35, stone=5, iron-ore=4, iron-plate=136, copper-plate=336, copper-cable=1))
+
+=== 2026-11-03T16:00:40 [scripts\12_more_iron.py] reward=18413
+n = 8
+gather(Resource.Stone, 90)
+craft_item(Prototype.BurnerMiningDrill, quantity=n)
+craft_item(Prototype.StoneFurnace, quantity=n)
+print('iron drills', place_drills(Resource.IronOre, n))
+refuel()
+print(inspect_inventory())
+
+--- output
+5: ('iron drills', 4)
+7: (Inventory(inserter=1, small-electric-pole=5, pipe=12, stone-furnace=3, wood=19, stone=15, iron-ore=4, iron-plate=64, copper-plate=336, copper-cable=1),)
+
+=== 2026-11-03T16:01:42 [-c] reward=21371
+
+for i in range(3):
+    for _ in range(4):
+        sleep(15)
+    try:
+        get_research_progress()
+    except Exception:
+        print('research', research_next())
+    tend()
+
+--- output
+9: ('tend: plates', 337, 'coal', 127, Inventory(inserter=1, small-electric-pole=5, pipe=12, stone-furnace=3, wood=19, coal=2, stone=15, iron-ore=4, iron-plate=159, copper-plate=480, copper-cable=1))
+9: ('tend: plates', 166, 'coal', 46, Inventory(inserter=1, small-electric-pole=5, pipe=12, stone-furnace=3, wood=19, coal=3, stone=15, iron-ore=4, iron-plate=179, copper-plate=562, copper-cable=1))
+9: ('tend: plates', 148, 'coal', 38, Inventory(inserter=1, small-electric-pole=5, pipe=12, stone-furnace=3, wood=19, coal=1, stone=15, iron-ore=4, iron-plate=188, copper-plate=640, copper-cable=1))
+
+=== 2026-11-03T16:01:52 [scripts\09_coal_drills.py] reward=21837
+x=1
+--- output
+
+
+=== 2026-11-03T16:02:09 [scripts\13_more_coal.py] reward=24560
+n = 8
+gather(Resource.Coal, 30)
+gather(Resource.Stone, 50)
+craft_item(Prototype.BurnerMiningDrill, quantity=n)
+craft_item(Prototype.WoodenChest, quantity=n)
+print('coal drills', place_coal_drills(n))
+# boiler fuel check
+b = get_entity(Prototype.Boiler, Position(x=-12.5, y=30.0))
+print('boiler fuel', b.fuel)
+print(inspect_inventory())
+
+--- output
+6: ('coal drills', 7)
+9: ('boiler fuel', Inventory())
+10: (Inventory(wooden-chest=1, inserter=1, small-electric-pole=5, pipe=12, wood=3, stone=40, iron-ore=4, iron-plate=116, copper-plate=640, copper-cable=1),)
+
+=== 2026-11-03T16:02:33 [scripts\14_boiler_feed.py] reward=25780
+print('coal collected', collect_coal())
+refuel()
+boiler = get_entity(Prototype.Boiler, Position(x=-12.5, y=30.0))
+move_to(Position(x=-9.5, y=33.5))
+boiler = insert_item(Prototype.Coal, boiler, quantity=min(30, inv(Prototype.Coal)))
+print('boiler fuel now', boiler.fuel)
+
+# chest + inserter feeding the boiler from the right side
+craft_item(Prototype.Inserter, quantity=1)
+ins = place_entity(Prototype.Inserter, direction=Direction.LEFT, position=Position(x=-10.5, y=30.5))
+print('inserter', ins.position, ins.pickup_position, ins.drop_position)
+chest = place_entity(Prototype.WoodenChest, position=ins.pickup_position)
+print(connect_entities(Position(x=-8.5, y=24.5), ins, Prototype.SmallElectricPole))
+chest = insert_item(Prototype.Coal, chest, quantity=inv(Prototype.Coal))
+print('chest', chest.position, chest.inventory)
+sleep(5)
+print('inserter', get_entity(Prototype.Inserter, ins.position).status)
+
+--- output
+1: ('coal collected', 154)
+6: ('boiler fuel now', Inventory(coal=30))
+11: ('inserter', Position(x=-10.5, y=30.5), Position(x=-9.5, y=30.5), Position(x=-11.5, y=30.5))
+13: (	ElectricityGroup(id=1, poles=[(x=-7.5,y=18.5),(x=-10.5,y=24.5),(x=-8.5,y=24.5),...,(x=-5.5,y=22.5),(x=-9.5,y=27.5),(x=-9.5,y=29.5)], voltage=55502395),)
+15: ('chest', Position(x=-9.5, y=30.5), Inventory(coal=34))
+17: ('inserter', EntityStatus.WAITING_FOR_SPACE_IN_DESTINATION)
+
+=== 2026-11-03T16:03:02 [scripts\15_tend2.py] reward=27541
+BOILER_CHEST = Position(x=-9.5, y=30.5)
+
+def feed_boiler_chest(reserve=30):
+    spare = inv(Prototype.Coal) - reserve
+    if spare > 0:
+        move_to(Position(x=BOILER_CHEST.x + 2, y=BOILER_CHEST.y + 2))
+        chest = get_entity(Prototype.WoodenChest, BOILER_CHEST)
+        insert_item(Prototype.Coal, chest, quantity=spare)
+
+def ensure_research():
+    try:
+        get_research_progress()
+    except Exception:
+        return research_next()
+
+def tend():
+    c = collect_plates()
+    k = collect_coal()
+    refuel()
+    feed_science()
+    feed_boiler_chest()
+    r = ensure_research()
+    print('tend: plates', c, 'coal', k, 'research', r, inspect_inventory())
+
+tend()
+
+--- output
+25: ('tend: plates', 481, 'coal', 175, 'research', <Technology.LogisticsSciencePack: 'logistic-science-pack'>, Inventory(inserter=1, small-electric-pole=3, pipe=12, wood=3, coal=30, stone=40, iron-ore=4, iron-plate=252, copper-plate=915))
+
+=== 2026-11-03T16:05:13 [-c] reward=34825
+
+for i in range(5):
+    for _ in range(4):
+        sleep(15)
+    tend()
+
+--- output
+5: ('tend: plates', 295, 'coal', 246, 'research', None, Inventory(inserter=1, small-electric-pole=3, pipe=12, wood=3, coal=30, stone=40, iron-ore=4, iron-plate=387, copper-plate=1055))
+5: ('tend: plates', 208, 'coal', 303, 'research', None, Inventory(inserter=1, small-electric-pole=3, pipe=12, wood=3, coal=30, stone=40, iron-ore=4, iron-plate=481, copper-plate=1152))
+5: ('tend: plates', 225, 'coal', 365, 'research', None, Inventory(inserter=1, small-electric-pole=3, pipe=12, wood=3, coal=30, stone=40, iron-ore=4, iron-plate=586, copper-plate=1257))
+5: ('tend: plates', 215, 'coal', 434, 'research', None, Inventory(inserter=1, small-electric-pole=3, pipe=12, wood=3, coal=30, stone=40, iron-ore=4, iron-plate=683, copper-plate=1357))
+5: ('tend: plates', 223, 'coal', 510, 'research', None, Inventory(inserter=1, small-electric-pole=3, pipe=12, wood=3, coal=30, stone=40, iron-ore=4, iron-plate=786, copper-plate=1462))
+
+=== 2026-11-03T16:05:20 [-c] reward=35313
+
+try:
+    craft_item(Prototype.LogisticsSciencePack, quantity=2); print('green ok')
+except Exception as e: print('green no:', str(e)[:140])
+print(get_research_progress())
+print(inspect_inventory())
+
+--- output
+4: ('green no:', 'Failed to craft 2x logistic-science-pack because recipe for logistic-science-pack is not unlocked yet (requires logistic-science-pack techno')
+5: ([Ingredient(name='automation-science-pack', count=42, type=None)],)
+6: (Inventory(inserter=1, small-electric-pole=3, pipe=12, wood=3, coal=30, stone=40, iron-ore=4, iron-plate=786, copper-plate=1462),)
+
+=== 2026-11-03T16:05:29 [scripts\16_more_labs.py] reward=36695
+craft_item(Prototype.Lab, quantity=3)
+craft_item(Prototype.SmallElectricPole, quantity=6)
+craft_item(Prototype.AutomationSciencePack, quantity=80)
+base = get_entity(Prototype.Lab, Position(x=-6.5, y=24.5))
+move_to(Position(x=base.position.x + 5, y=base.position.y + 5))
+labs = [base]
+prev = base
+for i in range(3):
+    lab = place_entity_next_to(Prototype.Lab, reference_position=prev.position, direction=Direction.RIGHT, spacing=1)
+    print('lab', lab.position)
+    connect_entities(prev, lab, Prototype.SmallElectricPole)
+    labs.append(lab)
+    prev = lab
+for lab in labs:
+    insert_item(Prototype.AutomationSciencePack, lab, quantity=20)
+sleep(5)
+for lab in labs:
+    print(get_entity(Prototype.Lab, lab.position).status)
+print(inspect_inventory())
+
+--- output
+1: ('\nException: Failed to craft 3x lab because still missing ingredients - iron-gear-wheel x6',)
+
+=== 2026-11-03T16:06:25 [scripts\16_more_labs.py] reward=47779
+craft_item(Prototype.IronGearWheel, quantity=60)
+craft_item(Prototype.ElectronicCircuit, quantity=30)
+craft_item(Prototype.TransportBelt, quantity=12)
+craft_item(Prototype.Lab, quantity=3)
+craft_item(Prototype.SmallElectricPole, quantity=6)
+craft_item(Prototype.AutomationSciencePack, quantity=80)
+base = get_entity(Prototype.Lab, Position(x=-6.5, y=24.5))
+move_to(Position(x=base.position.x + 5, y=base.position.y + 5))
+labs = [base]
+prev = base
+for i in range(3):
+    lab = place_entity_next_to(Prototype.Lab, reference_position=prev.position, direction=Direction.RIGHT, spacing=1)
+    print('lab', lab.position)
+    connect_entities(prev, lab, Prototype.SmallElectricPole)
+    labs.append(lab)
+    prev = lab
+for lab in labs:
+    insert_item(Prototype.AutomationSciencePack, lab, quantity=20)
+sleep(5)
+for lab in labs:
+    print(get_entity(Prototype.Lab, lab.position).status)
+print(inspect_inventory())
+
+--- output
+7: ('Error occurred:\n  Line 7: base = get_entity(Prototype.Lab, Position(x=-6.5, y=24.5))\n\nException: (\'Could not get Prototype.Lab at position x=-6.5 y=24.5\', AttributeError("\'list\' object has no attribute \'items\'"))',)
+
+=== 2026-11-03T16:06:31 [-c] reward=47943
+
+try:
+    print(get_entities({Prototype.Lab}))
+except Exception as e: print('get_entities err', str(e)[:200])
+print(inspect_inventory())
+
+--- output
+3: ([],)
+5: (Inventory(transport-belt=12, inserter=1, small-electric-pole=9, pipe=12, lab=3, coal=30, stone=40, iron-ore=4, iron-plate=470, copper-plate=1289, electronic-circuit=30, automation-science-pack=80),)
+
+=== 2026-11-03T16:06:49 [scripts\16_more_labs.py] reward=48125
+# NOTE: get_entity/get_entities fail for labs holding science packs (Lua array vs dict in the
+# serializer), so labs are placed by coordinates and kept in LABS for later insert_item calls.
+move_to(Position(x=-2.5, y=28.5))
+LABS = []
+for i in range(1, 4):
+    x = -6.5 + 4 * i
+    pole = place_entity(Prototype.SmallElectricPole, position=Position(x=x - 2, y=26.5))
+    lab = place_entity(Prototype.Lab, position=Position(x=x, y=24.5))
+    lab = insert_item(Prototype.AutomationSciencePack, lab, quantity=26)
+    LABS.append(lab)
+    print('lab', lab.position, lab.status)
+print(inspect_inventory())
+
+--- output
+8: ('Error occurred:\n  Line 8: lab = place_entity(Prototype.Lab, position=Position(x=x, y=24.5))\n\nException: Could not place lab at (-2.5, 24.5), [pack]',)
+
+=== 2026-11-03T16:06:55 [-c] reward=48115
+print(inspect_inventory())
+--- output
+1: (Inventory(transport-belt=12, inserter=1, small-electric-pole=8, pipe=12, lab=2, coal=30, stone=40, iron-ore=4, iron-plate=470, copper-plate=1289, electronic-circuit=30, automation-science-pack=80),)
+
+=== 2026-11-03T16:07:15 [scripts\16_more_labs.py] reward=49060
+# get_entity/get_entities fail for labs holding science packs (Lua array vs dict in the
+# serializer) and place_entity(Lab) raises after placing, so: ignore those errors, and
+# share packs between labs with inserters instead of inserting by hand.
+def safe_place(proto, pos, direction=Direction.UP):
+    try:
+        return place_entity(proto, direction=direction, position=pos)
+    except Exception as e:
+        print('placed with error', proto.value[0], pos, str(e)[:40])
+
+craft_item(Prototype.Inserter, quantity=6)
+craft_item(Prototype.WoodenChest, quantity=1) if inv(Prototype.WoodenChest) < 1 and inv(Prototype.Wood) >= 2 else None
+craft_item(Prototype.IronChest, quantity=1)
+move_to(Position(x=0.5, y=28.5))
+
+safe_place(Prototype.SmallElectricPole, Position(x=-0.5, y=26.5))
+safe_place(Prototype.SmallElectricPole, Position(x=3.5, y=26.5))
+safe_place(Prototype.Lab, Position(x=1.5, y=24.5))
+safe_place(Prototype.Lab, Position(x=5.5, y=24.5))
+for gx in (-4.5, -0.5, 3.5):
+    safe_place(Prototype.Inserter, Position(x=gx, y=24.5), Direction.RIGHT)
+
+# hand-fed pack chest below the first lab
+safe_place(Prototype.SmallElectricPole, Position(x=-8.5, y=27.5))
+safe_place(Prototype.Inserter, Position(x=-6.5, y=26.5), Direction.UP)
+packs_chest = place_entity(Prototype.IronChest, position=Position(x=-6.5, y=27.5))
+packs_chest = insert_item(Prototype.AutomationSciencePack, packs_chest, quantity=inv(Prototype.AutomationSciencePack))
+print('packs chest', packs_chest.position, packs_chest.inventory)
+print(inspect_inventory())
+
+--- output
+17: ('placed with error', 'lab', Position(x=1.5, y=24.5), 'Could not place lab at (1.5, 24.5), [pac')
+18: ('placed with error', 'lab', Position(x=5.5, y=24.5), 'Could not place lab at (5.5, 24.5), [pac')
+27: ('packs chest', Position(x=-6.5, y=27.5), Inventory(automation-science-pack=80))
+28: (Inventory(transport-belt=12, inserter=3, small-electric-pole=5, pipe=12, coal=30, stone=40, iron-ore=4, iron-plate=444, copper-plate=1289, electronic-circuit=24),)
+
+=== 2026-11-03T16:08:15 [scripts\17_tend3.py] reward=51507
+PACK_CHEST = Position(x=-6.5, y=27.5)
+
+def feed_packs(n=40):
+    """Hand-craft red science from stock plates and drop it into the lab chest."""
+    if inv(Prototype.IronPlate) < 2 * n + 100 or inv(Prototype.CopperPlate) < n + 50:
+        return
+    craft_item(Prototype.IronGearWheel, quantity=n)
+    craft_item(Prototype.AutomationSciencePack, quantity=n)
+    move_to(Position(x=PACK_CHEST.x + 2, y=PACK_CHEST.y + 2))
+    chest = get_entity(Prototype.IronChest, PACK_CHEST)
+    insert_item(Prototype.AutomationSciencePack, chest, quantity=inv(Prototype.AutomationSciencePack))
+
+def tend():
+    c = collect_plates()
+    k = collect_coal()
+    refuel()
+    feed_science()
+    feed_boiler_chest()
+    feed_packs()
+    r = ensure_research()
+    print('tend: plates', c, 'coal', k, 'research', r, inspect_inventory())
+
+tend()
+
+--- output
+23: ('tend: plates', 876, 'coal', 875, 'research', <Technology.SteelProcessing: 'steel-processing'>, Inventory(transport-belt=12, inserter=3, small-electric-pole=5, pipe=12, coal=30, stone=40, iron-ore=4, iron-plate=782, copper-plate=1615, electronic-circuit=24))
+
+=== 2026-11-03T16:09:38 [scripts\18_green.py] reward=69634
+def feed_green(n=30):
+    if inv(Prototype.IronPlate) < 6 * n + 100 or inv(Prototype.CopperPlate) < 2 * n + 50:
+        return
+    try:
+        craft_item(Prototype.IronGearWheel, quantity=3 * n)
+        craft_item(Prototype.ElectronicCircuit, quantity=n)
+        craft_item(Prototype.Inserter, quantity=n)
+        craft_item(Prototype.TransportBelt, quantity=n)
+        craft_item(Prototype.LogisticsSciencePack, quantity=n)
+    except Exception as e:
+        print('green craft failed', str(e)[:100])
+        return
+    move_to(Position(x=PACK_CHEST.x + 2, y=PACK_CHEST.y + 2))
+    chest = get_entity(Prototype.IronChest, PACK_CHEST)
+    insert_item(Prototype.LogisticsSciencePack, chest, quantity=inv(Prototype.LogisticsSciencePack))
+
+def tend():
+    c = collect_plates()
+    k = collect_coal()
+    refuel()
+    feed_science()
+    feed_boiler_chest()
+    feed_packs()
+    feed_green()
+    r = ensure_research()
+    print('tend: plates', c, 'coal', k, 'research', r, inspect_inventory())
+
+tend()
+
+--- output
+28: ('tend: plates', 316, 'coal', 962, 'research', <Technology.FastInserter: 'fast-inserter'>, Inventory(transport-belt=12, inserter=3, small-electric-pole=5, pipe=12, coal=37, stone=40, iron-ore=4, iron-plate=584, copper-plate=1684, iron-gear-wheel=45, electronic-circuit=24))
+
+=== 2026-11-03T16:09:59 [scripts\19_power_line.py] reward=71000
+gather(Resource.Wood, 40)
+craft_item(Prototype.IronGearWheel, quantity=40)
+craft_item(Prototype.SteamEngine, quantity=1)
+craft_item(Prototype.SmallElectricPole, quantity=30)
+craft_item(Prototype.Pipe, quantity=4)
+
+move_to(Position(x=-9.5, y=20.5))
+e1 = get_entity(Prototype.SteamEngine, Position(x=-12.5, y=24.5))
+try:
+    e2 = place_entity_next_to(Prototype.SteamEngine, reference_position=e1.position, direction=Direction.UP, spacing=0)
+    print('engine2', e2.position, e2.status)
+except Exception as e:
+    print('engine2 err', str(e)[:200])
+print(inspect_inventory())
+
+--- output
+11: ('engine2', Position(x=-12.5, y=19.5), EntityStatus.NOT_CONNECTED)
+14: (Inventory(transport-belt=12, inserter=3, small-electric-pole=35, pipe=11, wood=17, coal=37, stone=40, iron-ore=4, iron-plate=490, copper-plate=1669, iron-gear-wheel=77, electronic-circuit=24),)
+
+=== 2026-11-03T16:10:17 [scripts\20_electric_iron.py] reward=71177
+N = 8
+craft_item(Prototype.IronGearWheel, quantity=5 * N)
+craft_item(Prototype.ElectronicCircuit, quantity=3 * N)
+craft_item(Prototype.ElectricMiningDrill, quantity=N)
+craft_item(Prototype.StoneFurnace, quantity=N) if inv(Prototype.Stone) >= 5 * N else gather(Resource.Stone, 5 * N + 10)
+craft_item(Prototype.StoneFurnace, quantity=N) if inv(Prototype.StoneFurnace) < N else None
+print(inspect_inventory())
+
+ref = nearest(Resource.IronOre)
+patch = get_resource_patch(Resource.IronOre, ref, radius=25)
+bb = patch.bounding_box
+drills = []
+y = bb.left_top.y + 2
+while y < bb.right_bottom.y - 2 and len(drills) < N:
+    x = bb.left_top.x + 2
+    while x < bb.right_bottom.x - 2 and len(drills) < N:
+        pos = Position(x=x, y=y)
+        try:
+            move_to(Position(x=x, y=y + 4))
+            if can_place_entity(Prototype.ElectricMiningDrill, Direction.DOWN, pos):
+                d = place_entity(Prototype.ElectricMiningDrill, direction=Direction.DOWN, position=pos)
+                try:
+                    f = place_entity(Prototype.StoneFurnace, position=d.drop_position)
+                    insert_item(Prototype.Coal, f, quantity=10)
+                except Exception as fe:
+                    print('furnace fail', str(fe)[:60])
+                drills.append(d)
+        except Exception as e:
+            pass
+        x += 4
+    y += 6
+print('electric drills', [d.position for d in drills])
+
+# power line from the plant to the first drill, then daisy-chain
+e1 = get_entity(Prototype.SteamEngine, Position(x=-12.5, y=19.5))
+grp = connect_entities(e1, drills[0], Prototype.SmallElectricPole)
+for a, b in zip(drills, drills[1:]):
+    try:
+        connect_entities(a, b, Prototype.SmallElectricPole)
+    except Exception as e:
+        print('link fail', a.position, b.position, str(e)[:80])
+print(inspect_inventory())
+
+--- output
+4: ('\nException: Failed to craft 8x electric-mining-drill because recipe for electric-mining-drill is not unlocked yet (requires electric-mining-drill technology). You need to research the technology first',)
+
+=== 2026-11-03T16:12:08 [-c] reward=88702
+
+for _ in range(4):
+    sleep(15)
+tend()
+
+--- output
+4: ('tend: plates', 752, 'coal', 1227, 'research', <Technology.AdvancedMaterialProcessing: 'advanced-material-processing'>, Inventory(transport-belt=12, inserter=3, small-electric-pole=35, pipe=11, wood=17, coal=270, stone=40, iron-ore=4, iron-plate=388, copper-plate=1897, iron-gear-wheel=162, electronic-circuit=48))
+
+=== 2026-11-03T16:12:26 [scripts\20_electric_iron.py] reward=92835
+N = 8
+craft_item(Prototype.IronGearWheel, quantity=5 * N)
+craft_item(Prototype.ElectronicCircuit, quantity=3 * N)
+craft_item(Prototype.ElectricMiningDrill, quantity=N)
+craft_item(Prototype.StoneFurnace, quantity=N) if inv(Prototype.Stone) >= 5 * N else gather(Resource.Stone, 5 * N + 10)
+craft_item(Prototype.StoneFurnace, quantity=N) if inv(Prototype.StoneFurnace) < N else None
+print(inspect_inventory())
+
+ref = nearest(Resource.IronOre)
+patch = get_resource_patch(Resource.IronOre, ref, radius=25)
+bb = patch.bounding_box
+drills = []
+y = bb.left_top.y + 2
+while y < bb.right_bottom.y - 2 and len(drills) < N:
+    x = bb.left_top.x + 2
+    while x < bb.right_bottom.x - 2 and len(drills) < N:
+        pos = Position(x=x, y=y)
+        try:
+            move_to(Position(x=x, y=y + 4))
+            if can_place_entity(Prototype.ElectricMiningDrill, Direction.DOWN, pos):
+                d = place_entity(Prototype.ElectricMiningDrill, direction=Direction.DOWN, position=pos)
+                try:
+                    f = place_entity(Prototype.StoneFurnace, position=d.drop_position)
+                    insert_item(Prototype.Coal, f, quantity=10)
+                except Exception as fe:
+                    print('furnace fail', str(fe)[:60])
+                drills.append(d)
+        except Exception as e:
+            pass
+        x += 4
+    y += 6
+print('electric drills', [d.position for d in drills])
+
+# power line from the plant to the first drill, then daisy-chain
+e1 = get_entity(Prototype.SteamEngine, Position(x=-12.5, y=19.5))
+grp = connect_entities(e1, drills[0], Prototype.SmallElectricPole)
+for a, b in zip(drills, drills[1:]):
+    try:
+        connect_entities(a, b, Prototype.SmallElectricPole)
+    except Exception as e:
+        print('link fail', a.position, b.position, str(e)[:80])
+print(inspect_inventory())
+
+--- output
+7: (Inventory(transport-belt=12, inserter=3, small-electric-pole=35, pipe=11, electric-mining-drill=8, stone-furnace=8, wood=17, coal=270, iron-ore=4, iron-plate=204, copper-plate=1861, iron-gear-wheel=162, electronic-circuit=48),)
+32: ('electric drills', [Position(x=-20.5, y=-77.5), Position(x=-12.5, y=-71.5), Position(x=-28.5, y=-65.5), Position(x=-24.5, y=-65.5), Position(x=-20.5, y=-65.5), Position(x=-16.5, y=-65.5), Position(x=-12.5, y=-65.5), Position(x=-8.5, y=-65.5)])
+41: ('link fail', Position(x=-12.5, y=-71.5), Position(x=-28.5, y=-65.5), "Failed to connect {'SmallElectricPole'} from electric-mining-drill at x=-12.5 y=")
+41: ('link fail', Position(x=-28.5, y=-65.5), Position(x=-24.5, y=-65.5), "Failed to connect {'SmallElectricPole'} from electric-mining-drill at x=-28.5 y=")
+41: ('link fail', Position(x=-24.5, y=-65.5), Position(x=-20.5, y=-65.5), "Failed to connect {'SmallElectricPole'} from electric-mining-drill at x=-24.5 y=")
+41: ('link fail', Position(x=-20.5, y=-65.5), Position(x=-16.5, y=-65.5), "Failed to connect {'SmallElectricPole'} from electric-mining-drill at x=-20.5 y=")
+41: ('link fail', Position(x=-16.5, y=-65.5), Position(x=-12.5, y=-65.5), "Failed to connect {'SmallElectricPole'} from electric-mining-drill at x=-16.5 y=")
+41: ('link fail', Position(x=-12.5, y=-65.5), Position(x=-8.5, y=-65.5), "Failed to connect {'SmallElectricPole'} from electric-mining-drill at x=-12.5 y=")
+42: (Inventory(transport-belt=12, inserter=3, pipe=11, wood=17, coal=190, iron-ore=4, iron-plate=204, copper-plate=1861, iron-gear-wheel=162, electronic-circuit=48),)
+
+=== 2026-11-03T16:12:44 [scripts\21_link_drills.py] reward=91919
+craft_item(Prototype.SmallElectricPole, quantity=2 * inv(Prototype.Wood))
+print('poles', inv(Prototype.SmallElectricPole))
+ds = get_entities({Prototype.ElectricMiningDrill})
+ds.sort(key=lambda d: (d.position.y, d.position.x))
+print('drills', len(ds), [d.status.name for d in ds])
+for a, b in zip(ds, ds[1:]):
+    try:
+        connect_entities(a, b, Prototype.SmallElectricPole)
+    except Exception as e:
+        print('link fail', a.position, b.position, str(e)[:100])
+for d in get_entities({Prototype.ElectricMiningDrill}):
+    print(d.position, d.status.name)
+
+--- output
+2: ('poles', 34)
+5: ('drills', 8, ['WORKING', 'WORKING', 'WORKING', 'NO_POWER', 'NO_POWER', 'NO_POWER', 'NO_POWER', 'NO_POWER'])
+12: (Position(x=-20.5, y=-77.5), 'WORKING')
+12: (Position(x=-12.5, y=-71.5), 'WORKING')
+12: (Position(x=-28.5, y=-65.5), 'WORKING')
+12: (Position(x=-24.5, y=-65.5), 'WORKING')
+12: (Position(x=-20.5, y=-65.5), 'WORKING')
+12: (Position(x=-16.5, y=-65.5), 'WORKING')
+12: (Position(x=-12.5, y=-65.5), 'WORKING')
+12: (Position(x=-8.5, y=-65.5), 'WORKING')
+
+=== 2026-11-03T16:18:43 [-c] reward=127774
+
+for _ in range(4):
+    sleep(15)
+tend()
+print('engines', [(e.position.y, e.status.name) for e in get_entities({Prototype.SteamEngine})])
+print('boiler', [b.status.name for b in get_entities({Prototype.Boiler})])
+
+--- output
+4: ('\nException: Could not extract.',)
+
+=== 2026-11-03T16:19:07 [scripts\22_robust_tend.py] reward=124557
+def collect_plates():
+    total = 0
+    for f in get_entities({Prototype.StoneFurnace}):
+        try:
+            out = f.furnace_result
+            for proto in (Prototype.IronPlate, Prototype.CopperPlate, Prototype.StoneBrick):
+                n = out[proto] if out else 0
+                if n:
+                    move_to(f.position.right().right())
+                    total += extract_item(proto, f, quantity=n)
+        except Exception as e:
+            pass
+    return total
+
+def collect_coal():
+    got = 0
+    for c in get_entities({Prototype.WoodenChest}):
+        try:
+            n = c.inventory[Prototype.Coal] if c.inventory else 0
+            if n and c.position != BOILER_CHEST:
+                move_to(c.position.right().right())
+                got += extract_item(Prototype.Coal, c, quantity=n)
+        except Exception:
+            pass
+    return got
+
+def refuel(min_coal=3, top_up=10):
+    for e in get_entities({Prototype.BurnerMiningDrill, Prototype.StoneFurnace}):
+        if inv(Prototype.Coal) < top_up:
+            break
+        try:
+            fuel = e.fuel[Prototype.Coal] if e.fuel else 0
+            if fuel < min_coal:
+                move_to(e.position.right().right())
+                insert_item(Prototype.Coal, e, quantity=top_up)
+        except Exception:
+            pass
+
+print('collected', collect_plates(), collect_coal())
+refuel()
+print(inspect_inventory())
+print('engines', [(e.position.y, e.status.name) for e in get_entities({Prototype.SteamEngine})])
+print('boiler', [b.status.name for b in get_entities({Prototype.Boiler})])
+
+--- output
+39: ('collected', 101, 0)
+41: (Inventory(transport-belt=12, inserter=3, small-electric-pole=27, pipe=11, coal=720, iron-ore=4, iron-plate=1395, copper-plate=3395, iron-gear-wheel=342, electronic-circuit=48),)
+42: ('engines', [(19.5, 'WORKING'), (24.5, 'WORKING')])
+43: ('boiler', ['WORKING'])
+
+=== 2026-11-03T16:21:17 [-c] reward=147594
+
+feed_packs(120)
+feed_green(60)
+print(get_research_progress())
+print(inspect_inventory())
+
+--- output
+4: ([Ingredient(name='automation-science-pack', count=45, type=None), Ingredient(name='logistic-science-pack', count=45, type=None)],)
+5: (Inventory(transport-belt=12, inserter=3, small-electric-pole=27, pipe=11, coal=720, iron-ore=4, iron-plate=645, copper-plate=3185, iron-gear-wheel=432, electronic-circuit=48),)
+
+=== 2026-11-03T16:27:14 [-c] reward=225418
+
+def cycle(pk=80, gr=50):
+    for _ in range(4):
+        sleep(15)
+    collect_plates(); collect_coal(); refuel(); feed_boiler_chest()
+    feed_packs(pk); feed_green(gr)
+    r = ensure_research()
+    i = inspect_inventory()
+    print('iron', i[Prototype.IronPlate], 'cu', i[Prototype.CopperPlate], 'coal', i[Prototype.Coal], 'research', r)
+for _ in range(3):
+    cycle()
+
+--- output
+11: ('iron', 815, 'cu', 3740, 'coal', 250, 'research', None)
+11: ('iron', 1013, 'cu', 4191, 'coal', 20, 'research', None)
+11: ('iron', 1115, 'cu', 4689, 'coal', 0, 'research', None)
+
+=== 2026-11-03T16:27:41 [-c] reward=226067
+
+gather(Resource.Coal, 150)
+refuel(top_up=15)
+for d in get_entities({Prototype.BurnerMiningDrill}):
+    pass
+print('coal drills', [(d.position.x, d.status.name) for d in get_entities({Prototype.BurnerMiningDrill}) if d.position.y < -80][:12])
+print(inspect_inventory())
+
+--- output
+6: ('coal drills', [(41.0, 'WORKING'), (45.0, 'WORKING'), (37.0, 'WORKING'), (41.0, 'WORKING'), (45.0, 'WORKING'), (49.0, 'WORKING'), (37.0, 'WORKING'), (41.0, 'WORKING'), (45.0, 'WORKING'), (49.0, 'WORKING'), (37.0, 'NO_FUEL'), (41.0, 'WAITING_FOR_SPACE_IN_DESTINATION')])
+7: (Inventory(transport-belt=12, inserter=3, small-electric-pole=27, pipe=11, iron-ore=4, iron-plate=1115, copper-plate=4689, iron-gear-wheel=657, electronic-circuit=48),)
+
+=== 2026-11-03T16:32:01 [-c] reward=290820
+
+def cycle(pk=80, gr=50):
+    for _ in range(4):
+        sleep(15)
+    collect_coal(); collect_plates(); refuel(top_up=15); feed_boiler_chest(reserve=250)
+    feed_packs(pk); feed_green(gr)
+    r = ensure_research()
+    i = inspect_inventory()
+    print('iron', i[Prototype.IronPlate], 'cu', i[Prototype.CopperPlate], 'coal', i[Prototype.Coal], 'research', r)
+for _ in range(3):
+    cycle()
+
+--- output
+11: ('iron', 615, 'cu', 4645, 'coal', 0, 'research', None)
+11: ('iron', 115, 'cu', 4545, 'coal', 267, 'research', None)
+11: ('iron', 200, 'cu', 4600, 'coal', 464, 'research', None)
+
+=== 2026-11-03T16:32:37 [scripts\23_more_electric_iron.py] reward=299454
+N = 8
+old = get_entities({Prototype.ElectricMiningDrill})
+craft_item(Prototype.IronGearWheel, quantity=5 * N) if inv(Prototype.IronGearWheel) < 5 * N else None
+craft_item(Prototype.ElectronicCircuit, quantity=3 * N) if inv(Prototype.ElectronicCircuit) < 3 * N else None
+craft_item(Prototype.ElectricMiningDrill, quantity=N)
+if inv(Prototype.StoneFurnace) < N:
+    gather(Resource.Stone, 5 * N + 10)
+    craft_item(Prototype.StoneFurnace, quantity=N)
+
+ref = nearest(Resource.IronOre)
+bb = get_resource_patch(Resource.IronOre, ref, radius=25).bounding_box
+new = []
+y = bb.left_top.y + 2
+while y < bb.right_bottom.y - 2 and len(new) < N:
+    x = bb.left_top.x + 2
+    while x < bb.right_bottom.x - 2 and len(new) < N:
+        pos = Position(x=x, y=y)
+        try:
+            move_to(Position(x=x, y=y + 4))
+            if can_place_entity(Prototype.ElectricMiningDrill, Direction.DOWN, pos):
+                d = place_entity(Prototype.ElectricMiningDrill, direction=Direction.DOWN, position=pos)
+                try:
+                    f = place_entity(Prototype.StoneFurnace, position=d.drop_position)
+                    insert_item(Prototype.Coal, f, quantity=10)
+                except Exception:
+                    pass
+                new.append(d)
+        except Exception:
+            pass
+        x += 4
+    y += 6
+print('new drills', len(new))
+anchor = min(old, key=lambda o: o.position.distance(new[0].position)) if old and new else None
+for d in new:
+    src = anchor if d is new[0] else min(old + new[:new.index(d)], key=lambda o: o.position.distance(d.position))
+    try:
+        connect_entities(src, d, Prototype.SmallElectricPole)
+    except Exception as e:
+        print('link fail', d.position, str(e)[:80])
+print([(d.position.x, d.status.name) for d in get_entities({Prototype.ElectricMiningDrill})])
+
+--- output
+32: ('new drills', 8)
+40: ([(-20.5, 'WAITING_FOR_SPACE_IN_DESTINATION'), (-12.5, 'WAITING_FOR_SPACE_IN_DESTINATION'), (-28.5, 'WAITING_FOR_SPACE_IN_DESTINATION'), (-24.5, 'WAITING_FOR_SPACE_IN_DESTINATION'), (-20.5, 'WORKING'), (-16.5, 'WORKING'), (-12.5, 'WORKING'), (-8.5, 'WORKING'), (-4.5, 'WORKING'), (-0.5, 'WORKING'), (-28.5, 'WORKING'), (-24.5, 'WORKING'), (-20.5, 'WORKING'), (-16.5, 'WORKING'), (-12.5, 'WORKING'), (-8.5, 'WORKING')],)
+
+=== 2026-11-03T16:33:47 [-c] reward=307916
+
+def cycle(pk=60, gr=30):
+    for _ in range(4):
+        sleep(15)
+    collect_coal(); collect_plates(); refuel(top_up=15); feed_boiler_chest(reserve=250)
+    feed_packs(pk); feed_green(gr)
+    r = ensure_research()
+    i = inspect_inventory()
+    print('iron', i[Prototype.IronPlate], 'cu', i[Prototype.CopperPlate], 'coal', i[Prototype.Coal], 'research', r)
+for _ in range(3):
+    cycle()
+
+--- output
+11: ('iron', 200, 'cu', 4600, 'coal', 719, 'research', None)
+11: ('iron', 200, 'cu', 4600, 'coal', 836, 'research', None)
+11: ('iron', 200, 'cu', 4600, 'coal', 836, 'research', None)
+
+=== 2026-11-03T16:34:07 [-c] reward=310449
+
+fs = get_entities({Prototype.StoneFurnace}); print('furnaces seen', len(fs))
+print(collect_plates())
+
+--- output
+2: ('furnaces seen', 34)
+3: (0,)
+
+=== 2026-11-03T16:34:14 [-c] reward=311152
+
+from collections import Counter
+fs = get_entities({Prototype.StoneFurnace})
+print(Counter(f.status.name for f in fs))
+f = fs[0]; print(f.position, f.fuel, f.furnace_source, f.furnace_result, f.status)
+ds = get_entities({Prototype.ElectricMiningDrill, Prototype.BurnerMiningDrill})
+print(Counter(d.status.name for d in ds))
+
+--- output
+4: (Counter({'WORKING': 25, 'NO_INGREDIENTS': 9}),)
+5: (Position(x=-40.0, y=-79.0), Inventory(coal=2), Inventory(), Inventory(copper-plate=8), EntityStatus.WORKING)
+7: (Counter({'WORKING': 36, 'WAITING_FOR_SPACE_IN_DESTINATION': 11}),)
+
+=== 2026-11-03T16:34:21 [-c] reward=312010
+
+fs = get_entities({Prototype.StoneFurnace})
+f = [x for x in fs if x.furnace_result[Prototype.CopperPlate] > 0 or x.furnace_result[Prototype.IronPlate] > 0][0]
+print(f.position, f.furnace_result)
+move_to(f.position.right().right())
+print('at', player_location)
+try:
+    print(extract_item(Prototype.CopperPlate if f.furnace_result[Prototype.CopperPlate] else Prototype.IronPlate, f, quantity=5))
+except Exception as e:
+    print('ERR', str(e)[:300])
+
+--- output
+4: (Position(x=-40.0, y=-79.0), Inventory(copper-plate=11))
+6: ('at', Position(x=13.5, y=-58.5))
+10: ('ERR', 'Could not extract.')
+
+=== 2026-11-03T16:34:28 [-c] reward=312888
+
+print('start', player_location)
+for t in [(13.5,-52.5),(0,-40),(-38,-79)]:
+    try:
+        print(t, move_to(Position(x=t[0], y=t[1])))
+    except Exception as e:
+        print(t, 'ERR', str(e)[:200])
+
+--- output
+2: ('start', Position(x=13.5, y=-58.5))
+5: ((13.5, -52.5), Position(x=13.5, y=-52.5))
+5: ((0, -40), Position(x=0.5, y=-39.5))
+5: ((-38, -79), Position(x=-37.5, y=-78.5))
+
+=== 2026-11-03T16:34:36 [-c] reward=313767
+
+fs = get_entities({Prototype.StoneFurnace})
+f = [x for x in fs if x.furnace_result[Prototype.CopperPlate] > 0][0]
+print(f.position, f.furnace_result)
+p = move_to(Position(x=f.position.x + 2, y=f.position.y))
+print('moved', p)
+try:
+    print('got', extract_item(Prototype.CopperPlate, f, quantity=5))
+except Exception as e:
+    print('ERR', str(e)[:400])
+print(inspect_inventory()[Prototype.CopperPlate])
+
+--- output
+4: (Position(x=-40.0, y=-79.0), Inventory(copper-plate=15))
+6: ('moved', Position(x=-37.5, y=-78.5))
+10: ('ERR', 'Could not extract.')
+11: (4600,)
+
+=== 2026-11-03T16:34:46 [scripts\24_storage.py] reward=315096
+STORAGE = []
+
+def stash(proto, keep, chest_cap=3200):
+    """Move everything above `keep` of `proto` into iron chests next to the base."""
+    extra = inv(proto) - keep
+    if extra <= 0:
+        return
+    move_to(Position(x=12.5, y=30.5))
+    for chest in STORAGE:
+        if extra <= 0:
+            return
+        try:
+            n = min(extra, 1500)
+            insert_item(proto, chest, quantity=n)
+            extra -= n
+        except Exception:
+            continue
+    while extra > 0:
+        craft_item(Prototype.IronChest, quantity=1)
+        c = place_entity(Prototype.IronChest, position=Position(x=10.5 + 2 * len(STORAGE), y=28.5))
+        STORAGE.append(c)
+        n = min(extra, 3000)
+        insert_item(proto, c, quantity=n)
+        extra -= n
+
+stash(Prototype.CopperPlate, 400)
+print(inspect_inventory())
+print('chests', [c.position for c in STORAGE])
+
+--- output
+26: ('Error occurred:\n  Line 19: craft_item(Prototype.IronChest, quantity=1)\n\nException: Failed to craft 1x iron-chest because Inventory is full - requires 1 slots but only 0 available',)
+
+=== 2026-11-03T16:34:54 [-c] reward=315884
+
+move_to(Position(x=PACK_CHEST.x + 2, y=PACK_CHEST.y + 2))
+c = get_entity(Prototype.IronChest, PACK_CHEST)
+print(insert_item(Prototype.CopperPlate, c, quantity=1500).inventory)
+
+--- output
+4: (Inventory(copper-plate=1500, automation-science-pack=688, logistic-science-pack=290),)
+
+=== 2026-11-03T16:34:55 [scripts\24_storage.py] reward=315913
+STORAGE = []
+
+def stash(proto, keep, chest_cap=3200):
+    """Move everything above `keep` of `proto` into iron chests next to the base."""
+    extra = inv(proto) - keep
+    if extra <= 0:
+        return
+    move_to(Position(x=12.5, y=30.5))
+    for chest in STORAGE:
+        if extra <= 0:
+            return
+        try:
+            n = min(extra, 1500)
+            insert_item(proto, chest, quantity=n)
+            extra -= n
+        except Exception:
+            continue
+    while extra > 0:
+        craft_item(Prototype.IronChest, quantity=1)
+        c = place_entity(Prototype.IronChest, position=Position(x=10.5 + 2 * len(STORAGE), y=28.5))
+        STORAGE.append(c)
+        n = min(extra, 3000)
+        insert_item(proto, c, quantity=n)
+        extra -= n
+
+stash(Prototype.CopperPlate, 400)
+print(inspect_inventory())
+print('chests', [c.position for c in STORAGE])
+
+--- output
+27: (Inventory(transport-belt=12, inserter=3, small-electric-pole=18, pipe=11, coal=836, stone=10, iron-ore=4, iron-plate=192, copper-plate=400, iron-gear-wheel=767, electronic-circuit=24),)
+28: ('chests', [Position(x=10.5, y=28.5)])
+
+=== 2026-11-03T16:35:27 [scripts\25_more_labs2.py] reward=333705
+collect_plates()
+n = 8
+craft_item(Prototype.ElectronicCircuit, quantity=max(0, 10 * n - inv(Prototype.ElectronicCircuit)))
+craft_item(Prototype.TransportBelt, quantity=max(0, 4 * n - inv(Prototype.TransportBelt)))
+craft_item(Prototype.Lab, quantity=n)
+craft_item(Prototype.Inserter, quantity=max(0, n - inv(Prototype.Inserter)))
+craft_item(Prototype.SmallElectricPole, quantity=max(0, 2 * n - inv(Prototype.SmallElectricPole)))
+move_to(Position(x=8.5, y=28.5))
+for i in range(n):
+    x = 9.5 + 4 * i
+    move_to(Position(x=x, y=28.5))
+    safe_place(Prototype.SmallElectricPole, Position(x=x - 2, y=26.5))
+    safe_place(Prototype.Lab, Position(x=x, y=24.5))
+    safe_place(Prototype.Inserter, Position(x=x - 2, y=24.5), Direction.RIGHT)
+print(inspect_inventory())
+
+--- output
+15: (Inventory(small-electric-pole=10, pipe=11, coal=836, stone=10, iron-ore=4, iron-plate=921, copper-plate=675, iron-gear-wheel=672, copper-cable=1),)
+
+=== 2026-11-03T16:35:52 [scripts\26_power2.py] reward=336247
+craft_item(Prototype.OffshorePump, quantity=1)
+craft_item(Prototype.Boiler, quantity=1)
+craft_item(Prototype.SteamEngine, quantity=2)
+craft_item(Prototype.Pipe, quantity=20)
+craft_item(Prototype.Inserter, quantity=1)
+craft_item(Prototype.IronChest, quantity=1)
+
+X = -22.5
+move_to(Position(x=X, y=32.5))
+pump = place_entity(Prototype.OffshorePump, position=Position(x=X, y=nearest(Resource.Water).y))
+print('pump', pump.position, pump.direction)
+boiler = place_entity_next_to(Prototype.Boiler, reference_position=pump.position, direction=Direction.UP, spacing=3)
+e1 = place_entity_next_to(Prototype.SteamEngine, reference_position=boiler.position, direction=Direction.UP, spacing=2)
+e2 = place_entity_next_to(Prototype.SteamEngine, reference_position=e1.position, direction=Direction.UP, spacing=0)
+print('boiler', boiler.position, 'engines', e1.position, e2.position)
+print(connect_entities(pump, boiler, Prototype.Pipe))
+print(connect_entities(boiler, e1, Prototype.Pipe))
+boiler = insert_item(Prototype.Coal, boiler, quantity=30)
+# automatic coal feed: chest + inserter on the right side of the boiler
+ins = place_entity(Prototype.Inserter, direction=Direction.LEFT, position=Position(x=boiler.position.x + 2, y=boiler.position.y + 0.5))
+chest = place_entity(Prototype.IronChest, position=ins.pickup_position)
+insert_item(Prototype.Coal, chest, quantity=600)
+# join to the main grid and power the inserter
+print(connect_entities(Position(x=-9.5, y=27.5), e2, Prototype.SmallElectricPole))
+print(connect_entities(e2, ins, Prototype.SmallElectricPole))
+sleep(5)
+print([(e.position.x, e.position.y, e.status.name) for e in get_entities({Prototype.SteamEngine, Prototype.Boiler})])
+BOILER2_CHEST = chest.position
+print('boiler2 chest', BOILER2_CHEST)
+
+--- output
+11: ('pump', Position(x=-22.5, y=36.5), Direction.UP)
+15: ('boiler', Position(x=-22.5, y=32.0), 'engines', Position(x=-22.5, y=26.5), Position(x=-22.5, y=21.5))
+16: (
+	PipeGroup(fluid_system=7, fluid=water position=x=-24.5 y=32.5, status=EntityStatus.FULL_OUTPUT, pipes=[(x=-24.5,y=32.5),(x=-24.5,y=33.5),(x=-24.5,y=34.5),(x=-23.5,y=34.5),(x=-23.5,y=35.5),(x=-22.5,y=35.5)]),)
+17: (
+	PipeGroup(fluid_system=6, position=x=-22.5 y=29.5, status=EntityStatus.EMPTY, pipes=[(x=-22.5,y=29.5),(x=-22.5,y=30.5)]),)
+24: (	ElectricityGroup(id=1, poles=[(x=-20.5,y=-79.5),(x=-18.5,y=-75.5),(x=-17.5,y=-74.5),...,(x=-0.5,y=26.5),(x=3.5,y=26.5),(x=-20.5,y=20.5)], voltage=2090065408),)
+25: (	ElectricityGroup(id=1, poles=[(x=-20.5,y=-79.5),(x=-18.5,y=-75.5),(x=-17.5,y=-74.5),...,(x=-8.5,y=24.5),(x=-8.5,y=27.5),(x=-9.5,y=27.5)], voltage=2091611190),)
+27: ([(-12.5, 19.5, 'WORKING'), (-22.5, 21.5, 'WORKING'), (-12.5, 24.5, 'WORKING'), (-22.5, 26.5, 'WORKING'), (-12.5, 30.0, 'WORKING'), (-22.5, 32.0, 'WORKING')],)
+29: ('boiler2 chest', Position(x=-19.5, y=32.5))
+
+=== 2026-11-03T16:40:05 [-c] reward=409361
+
+BOILER2_CHEST = Position(x=-19.5, y=32.5)
+def feed_boiler_chest(reserve=250):
+    spare = inv(Prototype.Coal) - reserve
+    if spare <= 0:
+        return
+    for pos, proto in ((BOILER_CHEST, Prototype.WoodenChest), (BOILER2_CHEST, Prototype.IronChest)):
+        move_to(Position(x=pos.x + 2, y=pos.y + 2))
+        try:
+            insert_item(Prototype.Coal, get_entity(proto, pos), quantity=max(1, spare // 2))
+        except Exception as e:
+            pass
+def cycle(pk=80, gr=50):
+    for _ in range(4):
+        sleep(15)
+    collect_coal(); collect_plates(); refuel(top_up=15); feed_boiler_chest()
+    stash(Prototype.CopperPlate, 500); stash(Prototype.IronGearWheel, 100)
+    feed_packs(pk); feed_green(gr)
+    r = ensure_research()
+    i = inspect_inventory()
+    print('iron', i[Prototype.IronPlate], 'cu', i[Prototype.CopperPlate], 'coal', i[Prototype.Coal], 'research', r)
+for _ in range(2):
+    cycle()
+
+--- output
+23: ('iron', 315, 'cu', 345, 'coal', 1002, 'research', None)
+23: ('iron', 962, 'cu', 345, 'coal', 1484, 'research', None)
+
+=== 2026-11-03T16:47:03 [-c] reward=398217
+
+for _ in range(3):
+    cycle()
+
+--- output
+3: ('iron', 1779, 'cu', 345, 'coal', 1235, 'research', None)
+3: ('iron', 1915, 'cu', 345, 'coal', 1761, 'research', None)
+3: ('iron', 1515, 'cu', 345, 'coal', 1574, 'research', None)
+
+=== 2026-11-03T16:55:19 [-c] reward=523603
+
+for _ in range(4):
+    cycle()
+
+--- output
+3: ('iron', 1215, 'cu', 345, 'coal', 2007, 'research', None)
+3: ('iron', 1115, 'cu', 345, 'coal', 1916, 'research', None)
+3: ('iron', 715, 'cu', 624, 'coal', 2502, 'research', None)
+3: ('iron', 207, 'cu', 345, 'coal', 2174, 'research', None)
+
+=== 2026-11-03T16:59:00 [-c] reward=548536
+
+for _ in range(3):
+    cycle()
+
+--- output
+3: ('iron', 140, 'cu', 320, 'coal', 2797, 'research', None)
+3: ('iron', 140, 'cu', 420, 'coal', 3191, 'research', None)
+3: ('iron', 200, 'cu', 500, 'coal', 3156, 'research', None)
+
+=== 2026-11-03T17:08:12 [-c] reward=0
+print(player_location, nearest(Resource.Coal))
+--- output
+1: (Position(x=0.0, y=0.0), Position(x=40.5, y=-82.5))
+
+=== 2026-11-03T17:08:22 [-c] reward=30
+
+p = nearest(Resource.Coal)
+move_to(p)
+print('walked to', p)
+print('harvested', harvest_resource(p, quantity=10))
+print(inspect_inventory())
+
+--- output
+4: ('walked to', Position(x=40.5, y=-82.5))
+5: ('harvested', 10)
+6: (Inventory(coal=10),)
+
+=== 2026-11-03T17:08:44 [scripts\30_opening.py] reward=165
+# Real-conditions opening: every step costs game time, so overlap smelting with mining.
+def inv(p):
+    return inspect_inventory()[p]
+
+def gather(resource, qty):
+    pos = nearest(resource)
+    move_to(pos)
+    return harvest_resource(pos, quantity=qty)
+
+gather(Resource.Stone, 25)            # 5 furnaces worth
+iron = nearest(Resource.IronOre)
+move_to(iron)
+harvest_resource(iron, quantity=15)
+craft_item(Prototype.StoneFurnace, quantity=2)
+f1 = place_entity(Prototype.StoneFurnace, position=Position(x=iron.x + 2, y=iron.y))
+f2 = place_entity(Prototype.StoneFurnace, position=Position(x=iron.x + 2, y=iron.y + 2))
+for f in (f1, f2):
+    insert_item(Prototype.Coal, f, quantity=3)
+insert_item(Prototype.IronOre, f1, quantity=8)
+insert_item(Prototype.IronOre, f2, quantity=7)
+# keep mining while they smelt
+harvest_resource(iron, quantity=20)
+print(inspect_inventory())
+
+--- output
+23: (Inventory(coal=4, stone=15, iron-ore=20),)
+
+=== 2026-11-03T17:08:56 [scripts\31_first_drill.py] reward=205
+def furnaces():
+    return get_entities({Prototype.StoneFurnace})
+
+def collect_plates():
+    total = 0
+    for f in furnaces():
+        for proto in (Prototype.IronPlate, Prototype.CopperPlate):
+            try:
+                n = f.furnace_result[proto]
+                if n:
+                    if f.position.distance(player_location) > 8:
+                        move_to(Position(x=f.position.x + 2, y=f.position.y))
+                    total += extract_item(proto, f, quantity=n)
+            except Exception:
+                pass
+    return total
+
+for f in furnaces():
+    insert_item(Prototype.IronOre, f, quantity=min(10, inv(Prototype.IronOre)))
+sleep(10)
+print('plates', collect_plates(), inspect_inventory())
+
+--- output
+21: ('plates', 16, Inventory(coal=4, stone=15, iron-plate=16))
+
+=== 2026-11-03T17:09:14 [scripts\32_drill1.py] reward=299
+craft_item(Prototype.BurnerMiningDrill, quantity=1)
+craft_item(Prototype.StoneFurnace, quantity=1)
+iron = nearest(Resource.IronOre)
+move_to(iron)
+pos = Position(x=iron.x - 3, y=iron.y)
+d = place_entity(Prototype.BurnerMiningDrill, direction=Direction.DOWN, position=pos)
+d = insert_item(Prototype.Coal, d, quantity=2)
+f = place_entity(Prototype.StoneFurnace, position=d.drop_position)
+insert_item(Prototype.Coal, f, quantity=1)
+print('drill', d.position, 'furnace', f.position, d.status)
+print(inspect_inventory())
+
+--- output
+10: ('drill', Position(x=1.0, y=-63.0), 'furnace', Position(x=2.0, y=-61.0), EntityStatus.WORKING)
+11: (Inventory(stone-furnace=1, coal=1, iron-plate=1, iron-gear-wheel=3),)
+
+=== 2026-11-03T17:09:22 [scripts\33_supplies.py] reward=-1
+gather(Resource.Coal, 40)
+gather(Resource.Stone, 40)
+iron = nearest(Resource.IronOre)
+move_to(iron)
+for e in get_entities({Prototype.BurnerMiningDrill, Prototype.StoneFurnace}):
+    try:
+        if e.position.distance(player_location) > 8:
+            move_to(Position(x=e.position.x + 2, y=e.position.y))
+        insert_item(Prototype.Coal, e, quantity=4)
+    except Exception:
+        pass
+print('plates', collect_plates(), inspect_inventory())
+
+--- output
+Traceback (most recent call last):
+  File "C:\Git\code-dumb\fle\agentd.py", line 97, in handle
+    tick = instance.rcon_client.send_command("/sc rcon.print(game.tick)")
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 276, in send_command
+    return self.send_commands(dict(command=command))["command"]
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 74, in wrapper
+    raise RCONNotConnected(NOT_CONNECTED)
+factorio_rcon.factorio_rcon.RCONNotConnected: The RCON client is currently not connected to the server
+
+
+=== 2026-11-03T17:09:28 [-c] reward=-1
+print(player_location, inspect_inventory())
+--- output
+Traceback (most recent call last):
+  File "C:\Git\code-dumb\fle\agentd.py", line 97, in handle
+    tick = instance.rcon_client.send_command("/sc rcon.print(game.tick)")
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 276, in send_command
+    return self.send_commands(dict(command=command))["command"]
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 74, in wrapper
+    raise RCONNotConnected(NOT_CONNECTED)
+factorio_rcon.factorio_rcon.RCONNotConnected: The RCON client is currently not connected to the server
+
+
+=== 2026-11-03T17:10:35 [scripts\30_opening.py] reward=-1
+# Real-conditions opening: every step costs game time, so overlap smelting with mining.
+def inv(p):
+    return inspect_inventory()[p]
+
+def gather(resource, qty):
+    pos = nearest(resource)
+    move_to(pos)
+    return harvest_resource(pos, quantity=qty)
+
+gather(Resource.Stone, 25)            # 5 furnaces worth
+iron = nearest(Resource.IronOre)
+move_to(iron)
+harvest_resource(iron, quantity=15)
+craft_item(Prototype.StoneFurnace, quantity=2)
+f1 = place_entity(Prototype.StoneFurnace, position=Position(x=iron.x + 2, y=iron.y))
+f2 = place_entity(Prototype.StoneFurnace, position=Position(x=iron.x + 2, y=iron.y + 2))
+for f in (f1, f2):
+    insert_item(Prototype.Coal, f, quantity=3)
+insert_item(Prototype.IronOre, f1, quantity=8)
+insert_item(Prototype.IronOre, f2, quantity=7)
+# keep mining while they smelt
+harvest_resource(iron, quantity=20)
+print(inspect_inventory())
+
+--- output
+Traceback (most recent call last):
+  File "C:\Git\code-dumb\fle\agentd.py", line 100, in handle
+    tick = instance.rcon_client.send_command("/sc rcon.print(game.tick)")
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 276, in send_command
+    return self.send_commands(dict(command=command))["command"]
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 74, in wrapper
+    raise RCONNotConnected(NOT_CONNECTED)
+factorio_rcon.factorio_rcon.RCONNotConnected: The RCON client is currently not connected to the server
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 171, in connect
+    responses = self.receive_packets()
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 240, in receive_packets
+    raise RCONClosed(CONN_CLOSED)
+factorio_rcon.factorio_rcon.RCONClosed: The RCON server closed the connection
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Git\code-dumb\fle\agentd.py", line 102, in handle
+    instance.reconnect()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\fle\env\instance.py", line 605, in reconnect
+    self.rcon_client.connect()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 80, in wrapper
+    return function(self, *args, **kwargs)
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 173, in connect
+    raise RCONConnectError(CONNECT_COMMUNICATION_ERROR) from exc
+factorio_rcon.factorio_rcon.RCONConnectError: Failed to communicate authentication setup to the server
+
+
+=== 2026-11-03T17:10:36 [scripts\31_first_drill.py] reward=-1
+def furnaces():
+    return get_entities({Prototype.StoneFurnace})
+
+def collect_plates():
+    total = 0
+    for f in furnaces():
+        for proto in (Prototype.IronPlate, Prototype.CopperPlate):
+            try:
+                n = f.furnace_result[proto]
+                if n:
+                    if f.position.distance(player_location) > 8:
+                        move_to(Position(x=f.position.x + 2, y=f.position.y))
+                    total += extract_item(proto, f, quantity=n)
+            except Exception:
+                pass
+    return total
+
+for f in furnaces():
+    insert_item(Prototype.IronOre, f, quantity=min(10, inv(Prototype.IronOre)))
+sleep(10)
+print('plates', collect_plates(), inspect_inventory())
+
+--- output
+Traceback (most recent call last):
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 171, in connect
+    responses = self.receive_packets()
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 240, in receive_packets
+    raise RCONClosed(CONN_CLOSED)
+factorio_rcon.factorio_rcon.RCONClosed: The RCON server closed the connection
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Git\code-dumb\fle\agentd.py", line 95, in handle
+    instance.ensure_connected()  # RCON can drop during long non-fast actions
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\fle\env\instance.py", line 616, in ensure_connected
+    self.reconnect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\fle\env\instance.py", line 605, in reconnect
+    self.rcon_client.connect()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 80, in wrapper
+    return function(self, *args, **kwargs)
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 173, in connect
+    raise RCONConnectError(CONNECT_COMMUNICATION_ERROR) from exc
+factorio_rcon.factorio_rcon.RCONConnectError: Failed to communicate authentication setup to the server
+
+
+=== 2026-11-03T17:10:36 [scripts\32_drill1.py] reward=-1
+craft_item(Prototype.BurnerMiningDrill, quantity=1)
+craft_item(Prototype.StoneFurnace, quantity=1)
+iron = nearest(Resource.IronOre)
+move_to(iron)
+pos = Position(x=iron.x - 3, y=iron.y)
+d = place_entity(Prototype.BurnerMiningDrill, direction=Direction.DOWN, position=pos)
+d = insert_item(Prototype.Coal, d, quantity=2)
+f = place_entity(Prototype.StoneFurnace, position=d.drop_position)
+insert_item(Prototype.Coal, f, quantity=1)
+print('drill', d.position, 'furnace', f.position, d.status)
+print(inspect_inventory())
+
+--- output
+Traceback (most recent call last):
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 171, in connect
+    responses = self.receive_packets()
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 240, in receive_packets
+    raise RCONClosed(CONN_CLOSED)
+factorio_rcon.factorio_rcon.RCONClosed: The RCON server closed the connection
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Git\code-dumb\fle\agentd.py", line 95, in handle
+    instance.ensure_connected()  # RCON can drop during long non-fast actions
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\fle\env\instance.py", line 616, in ensure_connected
+    self.reconnect()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\fle\env\instance.py", line 605, in reconnect
+    self.rcon_client.connect()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 80, in wrapper
+    return function(self, *args, **kwargs)
+  File "C:\Users\neclor\AppData\Local\Programs\Python\Python313\Lib\site-packages\factorio_rcon\factorio_rcon.py", line 173, in connect
+    raise RCONConnectError(CONNECT_COMMUNICATION_ERROR) from exc
+factorio_rcon.factorio_rcon.RCONConnectError: Failed to communicate authentication setup to the server
+
+
+=== 2026-11-03T17:13:20 [-c] reward=0
+print(player_location, nearest(Resource.Coal))
+--- output
+1: (Position(x=0.0, y=0.0), Position(x=40.5, y=-82.5))
+
+=== 2026-11-03T17:13:36 [-c] reward=0
+print(nearest(Resource.IronOre))
+--- output
+1: (Position(x=-15.5, y=-50.5),)
+
+=== 2026-11-03T17:17:08 [-c] reward=0
+print(player_location, nearest(Resource.Coal))
+--- output
+1: (Position(x=0.0, y=0.0), Position(x=40.5, y=-82.5))
+
+=== 2026-11-03T17:17:48 [scripts\30_opening.py] reward=85
+# Real-conditions opening: every step costs game time, so overlap smelting with mining.
+def inv(p):
+    return inspect_inventory()[p]
+
+def gather(resource, qty):
+    pos = nearest(resource)
+    move_to(pos)
+    return harvest_resource(pos, quantity=qty)
+
+gather(Resource.Stone, 25)            # 5 furnaces worth
+iron = nearest(Resource.IronOre)
+move_to(iron)
+harvest_resource(iron, quantity=15)
+craft_item(Prototype.StoneFurnace, quantity=2)
+f1 = place_entity(Prototype.StoneFurnace, position=Position(x=iron.x + 2, y=iron.y))
+f2 = place_entity(Prototype.StoneFurnace, position=Position(x=iron.x + 2, y=iron.y + 2))
+for f in (f1, f2):
+    insert_item(Prototype.Coal, f, quantity=3)
+insert_item(Prototype.IronOre, f1, quantity=8)
+insert_item(Prototype.IronOre, f2, quantity=7)
+# keep mining while they smelt
+harvest_resource(iron, quantity=20)
+print(inspect_inventory())
+
+--- output
+18: ('\nException: Could not insert: "No coal to insert from your inventory"',)
+
+=== 2026-11-03T17:17:54 [scripts\31_first_drill.py] reward=85
+def furnaces():
+    return get_entities({Prototype.StoneFurnace})
+
+def collect_plates():
+    total = 0
+    for f in furnaces():
+        for proto in (Prototype.IronPlate, Prototype.CopperPlate):
+            try:
+                n = f.furnace_result[proto]
+                if n:
+                    if f.position.distance(player_location) > 8:
+                        move_to(Position(x=f.position.x + 2, y=f.position.y))
+                    total += extract_item(proto, f, quantity=n)
+            except Exception:
+                pass
+    return total
+
+for f in furnaces():
+    insert_item(Prototype.IronOre, f, quantity=min(10, inv(Prototype.IronOre)))
+sleep(10)
+print('plates', collect_plates(), inspect_inventory())
+
+--- output
+21: ('plates', 0, Inventory(stone=15))
+
+=== 2026-11-03T17:17:54 [scripts\32_drill1.py] reward=85
+craft_item(Prototype.BurnerMiningDrill, quantity=1)
+craft_item(Prototype.StoneFurnace, quantity=1)
+iron = nearest(Resource.IronOre)
+move_to(iron)
+pos = Position(x=iron.x - 3, y=iron.y)
+d = place_entity(Prototype.BurnerMiningDrill, direction=Direction.DOWN, position=pos)
+d = insert_item(Prototype.Coal, d, quantity=2)
+f = place_entity(Prototype.StoneFurnace, position=d.drop_position)
+insert_item(Prototype.Coal, f, quantity=1)
+print('drill', d.position, 'furnace', f.position, d.status)
+print(inspect_inventory())
+
+--- output
+1: ('\nException: smelting). Recipe requires a crafting machine or smelting in a furnace. Required iron-plate amount for burner-mining-drill - 3)',)
+
+=== 2026-11-03T17:18:09 [scripts\30b_fuel_furnaces.py] reward=210
+gather(Resource.Coal, 25)
+iron = nearest(Resource.IronOre)
+move_to(iron)
+for f in get_entities({Prototype.StoneFurnace}):
+    try:
+        if f.position.distance(player_location) > 8:
+            move_to(Position(x=f.position.x + 2, y=f.position.y))
+        insert_item(Prototype.Coal, f, quantity=4)
+    except Exception as e:
+        print('fuel fail', f.position, str(e)[:60])
+harvest_resource(iron, quantity=20)
+print('plates', collect_plates(), inspect_inventory())
+
+--- output
+12: ('plates', 0, Inventory(coal=17, stone=15, iron-ore=20))
+
+=== 2026-11-03T17:18:18 [scripts\34_grow.py] reward=237
+iron = nearest(Resource.IronOre)
+for f in get_entities({Prototype.StoneFurnace}):
+    try:
+        if f.position.distance(player_location) > 8:
+            move_to(Position(x=f.position.x + 2, y=f.position.y))
+        insert_item(Prototype.IronOre, f, quantity=min(10, inv(Prototype.IronOre)))
+    except Exception:
+        pass
+harvest_resource(iron, quantity=25)   # mining takes game time while the furnaces work
+print('plates', collect_plates(), inspect_inventory())
+
+--- output
+9: ('\nException: Could not harvest. Nothing within reach to harvest',)
+
+=== 2026-11-03T17:18:23 [-c] reward=330
+
+iron = nearest(Resource.IronOre)
+move_to(iron)
+harvest_resource(iron, quantity=25)
+print('plates', collect_plates(), inspect_inventory())
+
+--- output
+5: ('plates', 17, Inventory(coal=17, stone=15, iron-ore=25, iron-plate=17))
+
+=== 2026-11-03T17:18:37 [scripts\32_drill1.py] reward=413
+craft_item(Prototype.BurnerMiningDrill, quantity=1)
+craft_item(Prototype.StoneFurnace, quantity=1)
+iron = nearest(Resource.IronOre)
+move_to(iron)
+pos = Position(x=iron.x - 3, y=iron.y)
+d = place_entity(Prototype.BurnerMiningDrill, direction=Direction.DOWN, position=pos)
+d = insert_item(Prototype.Coal, d, quantity=2)
+f = place_entity(Prototype.StoneFurnace, position=d.drop_position)
+insert_item(Prototype.Coal, f, quantity=1)
+print('drill', d.position, 'furnace', f.position, d.status)
+print(inspect_inventory())
+
+--- output
+10: ('drill', Position(x=1.0, y=-60.0), 'furnace', Position(x=2.0, y=-58.0), EntityStatus.WORKING)
+11: (Inventory(stone-furnace=1, coal=14, iron-ore=25, iron-plate=2, iron-gear-wheel=3),)
+
+=== 2026-11-03T17:18:41 [-c] reward=492
+
+iron = nearest(Resource.IronOre)
+print(harvest_resource(iron, quantity=20))
+
+--- output
+3: (20,)
+
+=== 2026-11-03T17:18:41 [-c] reward=492
+pass
+--- output
+
+
+=== 2026-11-03T17:19:29 [scripts\35_smelter_bank.py] reward=754
+BANK = []
+
+def build_bank(n):
+    """Stone furnaces in a row next to the iron patch, used for hand-fed smelting."""
+    iron = nearest(Resource.IronOre)
+    move_to(Position(x=iron.x + 6, y=iron.y + 4))
+    craft_item(Prototype.StoneFurnace, quantity=n)
+    for i in range(n):
+        f = place_entity(Prototype.StoneFurnace, position=Position(x=iron.x + 6 + 2 * i, y=iron.y + 6))
+        BANK.append(f.position)
+
+def feed_bank(ore_each, coal_each=3):
+    for pos in BANK:
+        f = get_entity(Prototype.StoneFurnace, pos)
+        if f.position.distance(player_location) > 8:
+            move_to(Position(x=f.position.x, y=f.position.y - 2))
+        insert_item(Prototype.Coal, f, quantity=coal_each)
+        insert_item(Prototype.IronOre, f, quantity=min(ore_each, inv(Prototype.IronOre)))
+
+gather(Resource.Stone, 40)
+build_bank(5)
+iron = nearest(Resource.IronOre)
+move_to(iron)
+harvest_resource(iron, quantity=60)
+feed_bank(12)
+print(inspect_inventory())
+
+--- output
+26: (Inventory(stone-furnace=1, stone=15, iron-ore=45, iron-plate=2, iron-gear-wheel=3),)
+
+=== 2026-11-03T17:19:58 [scripts\36_coal_setup.py] reward=1283
+def collect_plates():
+    total = 0
+    for f in get_entities({Prototype.StoneFurnace}):
+        for proto in (Prototype.IronPlate, Prototype.CopperPlate):
+            try:
+                n = f.furnace_result[proto]
+                if n:
+                    if f.position.distance(player_location) > 8:
+                        move_to(Position(x=f.position.x, y=f.position.y - 2))
+                    total += extract_item(proto, f, quantity=n)
+            except Exception:
+                pass
+    return total
+
+print('plates collected', collect_plates(), inspect_inventory())
+gather(Resource.Coal, 50)
+gather(Resource.Wood, 8)
+craft_item(Prototype.WoodenChest, quantity=2)
+n_drills = min(2, inv(Prototype.IronPlate) // 9)
+print('can build coal drills:', n_drills)
+if n_drills:
+    craft_item(Prototype.BurnerMiningDrill, quantity=n_drills)
+    ref = nearest(Resource.Coal)
+    move_to(ref)
+    for i in range(n_drills):
+        d = place_entity(Prototype.BurnerMiningDrill, direction=Direction.DOWN, position=Position(x=ref.x + 3 * i, y=ref.y))
+        d = insert_item(Prototype.Coal, d, quantity=5)
+        place_entity(Prototype.WoodenChest, position=d.drop_position)
+        print('coal drill', d.position)
+print(inspect_inventory())
+
+--- output
+15: ('plates collected', 70, Inventory(stone-furnace=1, stone=15, iron-ore=45, iron-plate=72, iron-gear-wheel=3))
+20: ('can build coal drills:', 2)
+29: ('coal drill', Position(x=39.0, y=-83.0))
+29: ('coal drill', Position(x=42.0, y=-83.0))
+30: (Inventory(stone-furnace=1, wood=4, coal=40, stone=5, iron-ore=45, iron-plate=54, iron-gear-wheel=3),)
+
+=== 2026-11-03T17:21:15 [scripts\37_iron_drills.py] reward=2210
+def place_drills(resource, count, chest=False):
+    ref = nearest(resource)
+    bb = get_resource_patch(resource, ref, radius=25).bounding_box
+    placed = 0
+    xs = [bb.left_top.x + 2 + 4 * i for i in range(int((bb.right_bottom.x - bb.left_top.x) // 4))]
+    ys = [bb.left_top.y + 2 + 4 * j for j in range(int((bb.right_bottom.y - bb.left_top.y) // 4))]
+    for yy in ys:
+        for xx in xs:
+            if placed >= count:
+                return placed
+            pos = Position(x=xx, y=yy)
+            try:
+                move_to(Position(x=xx, y=yy + 3))
+                if not can_place_entity(Prototype.BurnerMiningDrill, Direction.DOWN, pos):
+                    continue
+                d = place_entity(Prototype.BurnerMiningDrill, direction=Direction.DOWN, position=pos)
+                d = insert_item(Prototype.Coal, d, quantity=4)
+                if chest:
+                    place_entity(Prototype.WoodenChest, position=d.drop_position)
+                else:
+                    f = place_entity(Prototype.StoneFurnace, position=d.drop_position)
+                    insert_item(Prototype.Coal, f, quantity=3)
+                placed += 1
+            except Exception:
+                pass
+    return placed
+
+n = 4
+gather(Resource.Stone, 45)
+craft_item(Prototype.BurnerMiningDrill, quantity=n)
+craft_item(Prototype.StoneFurnace, quantity=n)
+print('placed', place_drills(Resource.IronOre, n))
+print(inspect_inventory())
+
+--- output
+32: ('placed', 3)
+33: (Inventory(stone-furnace=4, wood=4, coal=19, iron-ore=45, iron-plate=6, iron-gear-wheel=9),)
+
+=== 2026-11-03T17:21:56 [scripts\38_tend.py] reward=2334
+def near(pos, dy=-2):
+    if pos.distance(player_location) > 8:
+        move_to(Position(x=pos.x, y=pos.y + dy))
+
+def collect_coal():
+    got = 0
+    for c in get_entities({Prototype.WoodenChest}):
+        try:
+            n = c.inventory[Prototype.Coal]
+            if n:
+                near(c.position, 2)
+                got += extract_item(Prototype.Coal, c, quantity=n)
+        except Exception:
+            pass
+    return got
+
+def refuel(min_coal=2, top_up=5):
+    for e in get_entities({Prototype.BurnerMiningDrill, Prototype.StoneFurnace}):
+        if inv(Prototype.Coal) < top_up:
+            break
+        try:
+            if (e.fuel[Prototype.Coal] if e.fuel else 0) < min_coal:
+                near(e.position)
+                insert_item(Prototype.Coal, e, quantity=top_up)
+        except Exception:
+            pass
+
+def tend():
+    k = collect_coal()
+    p = collect_plates()
+    refuel()
+    return k, p
+
+print('tend', tend(), inspect_inventory())
+
+--- output
+34: ('tend', (66, 99), Inventory(stone-furnace=4, wood=4, coal=30, iron-ore=45, iron-plate=53, copper-plate=52, iron-gear-wheel=9))
+
+=== 2026-11-03T17:22:55 [-c] reward=3679
+
+def feed_bank(ore_each, coal_each=3):
+    for pos in BANK:
+        f = get_entity(Prototype.StoneFurnace, pos)
+        near(f.position)
+        insert_item(Prototype.Coal, f, quantity=coal_each)
+        insert_item(Prototype.IronOre, f, quantity=min(ore_each, inv(Prototype.IronOre)))
+def cycle(mine=40):
+    iron = nearest(Resource.IronOre)
+    move_to(iron)
+    harvest_resource(iron, quantity=mine)
+    feed_bank(12)
+    tend()
+    i = inspect_inventory()
+    print('iron', i[Prototype.IronPlate], 'cu', i[Prototype.CopperPlate], 'coal', i[Prototype.Coal], 'ore', i[Prototype.IronOre])
+for _ in range(2):
+    cycle()
+
+--- output
+17: ('iron', 84, 'cu', 75, 'coal', 31, 'ore', 25)
+17: ('iron', 174, 'cu', 104, 'coal', 24, 'ore', 5)
+
+=== 2026-11-03T17:23:34 [scripts\40_power_lab.py] reward=4200
+craft_item(Prototype.IronGearWheel, quantity=20)
+craft_item(Prototype.OffshorePump, quantity=1)
+craft_item(Prototype.Boiler, quantity=1)
+craft_item(Prototype.SteamEngine, quantity=1)
+craft_item(Prototype.Pipe, quantity=20)
+craft_item(Prototype.SmallElectricPole, quantity=8)
+print('crafted', inspect_inventory())
+
+water = nearest(Resource.Water)
+move_to(water)
+pump = place_entity(Prototype.OffshorePump, position=water)
+boiler = place_entity_next_to(Prototype.Boiler, reference_position=pump.position, direction=Direction.UP, spacing=3)
+engine = place_entity_next_to(Prototype.SteamEngine, reference_position=boiler.position, direction=Direction.UP, spacing=2)
+connect_entities(pump, boiler, Prototype.Pipe)
+connect_entities(boiler, engine, Prototype.Pipe)
+boiler = insert_item(Prototype.Coal, boiler, quantity=min(20, inv(Prototype.Coal)))
+print('plant', pump.position, boiler.position, engine.position)
+
+--- output
+7: ('crafted', Inventory(small-electric-pole=8, pipe=24, boiler=1, steam-engine=1, offshore-pump=1, stone-furnace=3, coal=24, iron-ore=5, iron-plate=88, copper-plate=92, iron-gear-wheel=19, copper-cable=16))
+17: ('plant', Position(x=-13.5, y=34.5), Position(x=-13.5, y=30.0), Position(x=-13.5, y=24.5))
+
+=== 2026-11-03T17:23:54 [scripts\41_lab.py] reward=6203
+craft_item(Prototype.IronGearWheel, quantity=max(0, 20 - inv(Prototype.IronGearWheel)))
+craft_item(Prototype.Lab, quantity=1)
+craft_item(Prototype.AutomationSciencePack, quantity=10)
+engine = get_entity(Prototype.SteamEngine, Position(x=-13.5, y=24.5))
+move_to(Position(x=engine.position.x + 4, y=engine.position.y))
+lab = place_entity_next_to(Prototype.Lab, reference_position=engine.position, direction=Direction.RIGHT, spacing=3)
+connect_entities(engine, lab, Prototype.SmallElectricPole)
+lab = insert_item(Prototype.AutomationSciencePack, lab, quantity=10)
+print('lab', lab.position, lab.status)
+print(inspect_inventory())
+
+--- output
+5: ('\nException: Could not get path to (-9.5, 24.5): Path not found or invalid request: not_found',)
+
+=== 2026-11-03T17:24:02 [scripts\41_lab.py] reward=5320
+engine = get_entity(Prototype.SteamEngine, Position(x=-13.5, y=24.5))
+lab = None
+for dx, dy in ((6, 0), (6, -6), (-6, 0), (0, -9)):
+    try:
+        spot = Position(x=engine.position.x + dx, y=engine.position.y + dy)
+        move_to(Position(x=spot.x, y=spot.y + 3))
+        if can_place_entity(Prototype.Lab, Direction.UP, spot):
+            lab = place_entity(Prototype.Lab, position=spot)
+            break
+    except Exception as e:
+        print('spot fail', dx, dy, str(e)[:70])
+print('lab', lab.position if lab else None)
+connect_entities(engine, lab, Prototype.SmallElectricPole)
+lab = insert_item(Prototype.AutomationSciencePack, lab, quantity=10)
+print('lab', lab.position, lab.status)
+LAB_POS = lab.position
+print(inspect_inventory())
+
+--- output
+11: ('spot fail', 6, 0, 'Could not get path to (-7.5, 27.5): Path not found or invalid request:')
+11: ('spot fail', 6, -6, 'Could not get path to (-7.5, 21.5): Path not found or invalid request:')
+11: ('spot fail', -6, 0, 'Could not get path to (-19.5, 27.5): Path not found or invalid request')
+11: ('spot fail', 0, -9, 'Could not get path to (-13.5, 18.5): Path not found or invalid request')
+12: ('lab', None)
+13: ("\nAttributeError: 'NoneType' object has no attribute 'position'",)
+
+=== 2026-11-03T17:24:08 [-c] reward=5282
+
+print('loc', player_location)
+for t in [(-13.5, 36.5), (-8.5, 30.5), (-4.5, 27.5), (0, 0), (-20.5, 28.5)]:
+    try: print(t, move_to(Position(x=t[0], y=t[1])))
+    except Exception as e: print(t, 'ERR', str(e)[:80])
+
+--- output
+2: ('loc', Position(x=55.5, y=-62.5))
+5: ((-13.5, 36.5), 'ERR', 'Could not get path to (-13.5, 36.5): Path not found or invalid request: not_foun')
+5: ((-8.5, 30.5), 'ERR', 'Could not get path to (-8.5, 30.5): Path not found or invalid request: not_found')
+5: ((-4.5, 27.5), 'ERR', 'Could not get path to (-4.5, 27.5): Path not found or invalid request: not_found')
+5: ((0, 0), 'ERR', 'Could not get path to (0.0, 0.0): Path not found or invalid request: not_found')
+5: ((-20.5, 28.5), 'ERR', 'Could not get path to (-20.5, 28.5): Path not found or invalid request: not_foun')
+
+=== 2026-11-03T17:24:24 [-c] reward=5149
+
+print('before', player_location)
+try:
+    player_location = Position(x=-11.5, y=29.5)
+except Exception as e:
+    print('assign err', str(e)[:100])
+print('after', player_location)
+for t in [(-8.5, 30.5), (-4.5, 24.5)]:
+    try: print(t, move_to(Position(x=t[0], y=t[1])))
+    except Exception as e: print(t, 'ERR', str(e)[:80])
+print('now', player_location)
+
+--- output
+2: ('before', Position(x=55.5, y=-62.5))
+6: ('assign err', "Cannot redefine 'player_location' — it is a built-in FLE function/variable. Choose a different name.")
+7: ('after', Position(x=55.5, y=-62.5))
+10: ((-8.5, 30.5), 'ERR', 'Could not get path to (-8.5, 30.5): Path not found or invalid request: not_found')
+10: ((-4.5, 24.5), 'ERR', 'Could not get path to (-4.5, 24.5): Path not found or invalid request: not_found')
+11: ('now', Position(x=55.5, y=-62.5))
+
+=== 2026-11-03T17:24:40 [-c] reward=5130
+
+print('0', player_location)
+inspect_inventory(); print('inv', player_location)
+nearest(Resource.Water); print('nearest', player_location)
+get_entities(radius=5); print('get_entities', player_location)
+try:
+    e = get_entity(Prototype.OffshorePump, Position(x=-13.5, y=34.5)); print('get_entity', player_location)
+except Exception as ex: print('ge err', str(ex)[:60])
+
+--- output
+2: ('0', Position(x=55.5, y=-62.5))
+3: ('inv', Position(x=55.5, y=-62.5))
+4: ('nearest', Position(x=55.5, y=-62.5))
+5: ('get_entities', Position(x=55.5, y=-62.5))
+7: ('get_entity', Position(x=55.5, y=-62.5))
+
+=== 2026-11-03T17:24:55 [-c] reward=5130
+
+for t in [(50, -60), (30, -30), (0, -10), (-8, 20)]:
+    try: print(t, move_to(Position(x=t[0], y=t[1])), player_location)
+    except Exception as e: print(t, 'ERR', str(e)[:90])
+
+--- output
+4: ((50, -60), 'ERR', 'Could not get path to (50.0, -60.0): Path not found or invalid request: not_found')
+4: ((30, -30), 'ERR', 'Could not get path to (30.0, -30.0): Path not found or invalid request: not_found')
+4: ((0, -10), 'ERR', 'Could not get path to (0.0, -10.0): Path not found or invalid request: not_found')
+4: ((-8, 20), 'ERR', 'Could not get path to (-8.0, 20.0): Path not found or invalid request: not_found')
+
+=== 2026-11-03T17:25:20 [-c] reward=5130
+
+print(type(move_to))
+for name in ('__self__', '__wrapped__', 'game_state', 'tool', 'func'):
+    print(name, hasattr(move_to, name))
+t = getattr(move_to, '__self__', None) or move_to
+print(type(t), [a for a in dir(t) if not a.startswith('__')][:25])
+
+--- output
+2: (<class 'function'>,)
+4: ('__self__', False)
+4: ('__wrapped__', True)
+4: ('game_state', True)
+4: ('tool', False)
+4: ('func', False)
+6: (<class 'fle.commons.models.serializable_function.SerializableFunction'>, ['_cached_func', '_instance', 'bind', 'closure', 'code_bytes', 'defaults', 'docstring', 'name', 'parameters', 'reconstruct', 'return_annotation'])
+
+=== 2026-11-03T17:25:33 [scripts\39_sync_location.py] reward=5130
+# FLE's move_to builds paths from a cached player_location that can drift from the real character
+# (it is only refreshed by successful move_to calls). Re-read the real position and store it.
+def sync_location():
+    out = move_to.connection.rcon_client.send_command(
+        "/sc local c=storage.agent_characters[1] rcon.print(c.position.x..','..c.position.y)")
+    x, y = [float(v) for v in out.split(',')]
+    move_to.game_state.player_location = Position(x=x, y=y)
+    return Position(x=x, y=y)
+
+print('synced', sync_location(), player_location)
+
+--- output
+10: ('synced', Position(x=-11.5, y=29.5), Position(x=55.5, y=-62.5))
+
+=== 2026-11-03T17:25:35 [-c] reward=5130
+
+for t in [(-8.5, 30.5), (-4.5, 24.5)]:
+    try: print(t, move_to(Position(x=t[0], y=t[1])), player_location)
+    except Exception as e: print(t, 'ERR', str(e)[:90])
+
+--- output
+3: ((-8.5, 30.5), Position(x=-11.5, y=29.5), Position(x=55.5, y=-62.5))
+3: ((-4.5, 24.5), Position(x=-8.9609375, y=29.9609375), Position(x=55.5, y=-62.5))
+
+=== 2026-11-03T17:25:41 [scripts\39_sync_location.py] reward=5130
+# FLE's move_to builds paths from a cached player_location that can drift from the real character
+# (it is only refreshed by successful move_to calls). Re-read the real position and store it.
+def sync_location():
+    out = move_to.connection.rcon_client.send_command(
+        "/sc local c=storage.agent_characters[1] rcon.print(c.position.x..','..c.position.y)")
+    x, y = [float(v) for v in out.split(',')]
+    move_to.game_state.player_location = Position(x=x, y=y)
+    return Position(x=x, y=y)
+
+print('synced', sync_location(), player_location)
+
+--- output
+10: ('synced', Position(x=-4.3203125, y=24.6796875), Position(x=55.5, y=-62.5))
+
+=== 2026-11-03T17:25:41 [-c] reward=5130
+
+sync_location()
+print(move_to(Position(x=-4.5, y=24.5)))
+print(sync_location())
+
+--- output
+3: (Position(x=-3.3203125, y=25.6796875),)
+4: (Position(x=-3.953125, y=25.046875),)
+
+=== 2026-11-03T17:25:52 [scripts\39_sync_location.py] reward=5130
+# FLE's move_to builds paths from a cached player_location that can drift from the real character
+# (only successful move_to calls refresh it; connect_entities/placing while walking do not).
+# go() re-reads the real position first. Use go() instead of move_to() everywhere.
+def sync_location():
+    out = move_to.connection.rcon_client.send_command(
+        "/sc local c=storage.agent_characters[1] rcon.print(c.position.x..','..c.position.y)")
+    x, y = [float(v) for v in out.split(',')]
+    move_to.game_state.player_location = Position(x=x, y=y)
+    return Position(x=x, y=y)
+
+def go(pos):
+    sync_location()
+    return move_to(pos)
+
+def inv(p):
+    return inspect_inventory()[p]
+
+def gather(resource, qty):
+    pos = nearest(resource)
+    go(pos)
+    return harvest_resource(pos, quantity=qty)
+
+def near(pos, dy=-2):
+    here = sync_location()
+    if pos.distance(here) > 8:
+        move_to(Position(x=pos.x, y=pos.y + dy))
+
+def collect_plates():
+    total = 0
+    for f in get_entities({Prototype.StoneFurnace}):
+        for proto in (Prototype.IronPlate, Prototype.CopperPlate):
+            try:
+                n = f.furnace_result[proto]
+                if n:
+                    near(f.position)
+                    total += extract_item(proto, f, quantity=n)
+            except Exception:
+                pass
+    return total
+
+print('go/gather/near/collect_plates defined; at', sync_location())
+
+--- output
+41: ('go/gather/near/collect_plates defined; at', Position(x=-3.953125, y=25.046875))
+
+=== 2026-11-03T17:26:26 [scripts\38_tend.py] reward=5194
+def near(pos, dy=-2):
+    if pos.distance(player_location) > 8:
+        move_to(Position(x=pos.x, y=pos.y + dy))
+
+def collect_coal():
+    got = 0
+    for c in get_entities({Prototype.WoodenChest}):
+        try:
+            n = c.inventory[Prototype.Coal]
+            if n:
+                near(c.position, 2)
+                got += extract_item(Prototype.Coal, c, quantity=n)
+        except Exception:
+            pass
+    return got
+
+def refuel(min_coal=2, top_up=5):
+    for e in get_entities({Prototype.BurnerMiningDrill, Prototype.StoneFurnace}):
+        if inv(Prototype.Coal) < top_up:
+            break
+        try:
+            if (e.fuel[Prototype.Coal] if e.fuel else 0) < min_coal:
+                near(e.position)
+                insert_item(Prototype.Coal, e, quantity=top_up)
+        except Exception:
+            pass
+
+def tend():
+    k = collect_coal()
+    p = collect_plates()
+    refuel()
+    return k, p
+
+print('tend', tend(), inspect_inventory())
+
+--- output
+34: ('tend', (78, 214), Inventory(transport-belt=8, small-electric-pole=8, pipe=16, stone-furnace=3, lab=1, coal=32, iron-ore=5, iron-plate=168, copper-plate=128, iron-gear-wheel=6, copper-cable=28, electronic-circuit=10, automation-science-pack=10))
+
+=== 2026-11-03T17:26:33 [scripts\39_sync_location.py] reward=5281
+# FLE's move_to builds paths from a cached player_location that can drift from the real character
+# (only successful move_to calls refresh it; connect_entities/placing while walking do not).
+# go() re-reads the real position first. Use go() instead of move_to() everywhere.
+def sync_location():
+    out = move_to.connection.rcon_client.send_command(
+        "/sc local c=storage.agent_characters[1] rcon.print(c.position.x..','..c.position.y)")
+    x, y = [float(v) for v in out.split(',')]
+    move_to.game_state.player_location = Position(x=x, y=y)
+    return Position(x=x, y=y)
+
+def go(pos):
+    sync_location()
+    return move_to(pos)
+
+def inv(p):
+    return inspect_inventory()[p]
+
+def gather(resource, qty):
+    pos = nearest(resource)
+    go(pos)
+    return harvest_resource(pos, quantity=qty)
+
+def near(pos, dy=-2):
+    here = sync_location()
+    if pos.distance(here) > 8:
+        move_to(Position(x=pos.x, y=pos.y + dy))
+
+def collect_plates():
+    total = 0
+    for f in get_entities({Prototype.StoneFurnace}):
+        for proto in (Prototype.IronPlate, Prototype.CopperPlate):
+            try:
+                n = f.furnace_result[proto]
+                if n:
+                    near(f.position)
+                    total += extract_item(proto, f, quantity=n)
+            except Exception:
+                pass
+    return total
+
+print('go/gather/near/collect_plates defined; at', sync_location())
+
+--- output
+41: ('go/gather/near/collect_plates defined; at', Position(x=2.36328125, y=-59.26953125))
+
+=== 2026-11-03T17:26:40 [-c] reward=5377
+
+engine = get_entity(Prototype.SteamEngine, Position(x=-13.5, y=24.5))
+go(Position(x=-8.5, y=28.5))
+lab = place_entity(Prototype.Lab, position=Position(x=-8.5, y=24.5))
+connect_entities(engine, lab, Prototype.SmallElectricPole)
+lab = insert_item(Prototype.AutomationSciencePack, lab, quantity=10)
+print('lab', lab.position, lab.status)
+
+--- output
+4: ('Error occurred:\n  Line 4: lab = place_entity(Prototype.Lab, position=Position(x=-8.5, y=24.5))\n\nException: (\'Could not get Prototype.Lab at position x=-8.5 y=24.5\', AttributeError("\'list\' object has no attribute \'items\'"))',)
+
+=== 2026-11-03T17:26:57 [scripts\42_lab_feed.py] reward=5687
+# Lab entities can't be fetched once they hold packs (serializer bug), so feed it via chest + inserter.
+craft_item(Prototype.Inserter, quantity=1)
+craft_item(Prototype.IronChest, quantity=1)
+go(Position(x=-9.5, y=29.5))
+place_entity(Prototype.SmallElectricPole, position=Position(x=-11.5, y=24.5))
+ins = place_entity(Prototype.Inserter, direction=Direction.UP, position=Position(x=-8.5, y=26.5))
+place_entity(Prototype.SmallElectricPole, position=Position(x=-10.5, y=26.5))
+chest = place_entity(Prototype.IronChest, position=ins.pickup_position)
+chest = insert_item(Prototype.AutomationSciencePack, chest, quantity=inv(Prototype.AutomationSciencePack))
+PACK_CHEST = chest.position
+print('pack chest', PACK_CHEST, chest.inventory, 'inserter', ins.pickup_position, ins.drop_position)
+
+--- output
+11: ('pack chest', Position(x=-8.5, y=27.5), Inventory(automation-science-pack=10), 'inserter', Position(x=-8.5, y=27.5), Position(x=-8.5, y=25.5))
+
+=== 2026-11-03T17:27:23 [scripts\43_boiler_feed.py] reward=5892
+craft_item(Prototype.Inserter, quantity=1)
+craft_item(Prototype.IronChest, quantity=1)
+go(Position(x=-9.5, y=32.5))
+ins = place_entity(Prototype.Inserter, direction=Direction.LEFT, position=Position(x=-11.5, y=30.5))
+place_entity(Prototype.SmallElectricPole, position=Position(x=-10.5, y=29.5))
+chest = place_entity(Prototype.IronChest, position=ins.pickup_position)
+chest = insert_item(Prototype.Coal, chest, quantity=max(1, inv(Prototype.Coal) - 5))
+BOILER_CHEST = chest.position
+print('boiler chest', BOILER_CHEST, chest.inventory, ins.drop_position)
+b = get_entity(Prototype.Boiler, Position(x=-13.5, y=30.0))
+print('boiler', b.status, b.fuel)
+
+--- output
+9: ('boiler chest', Position(x=-10.5, y=30.5), Inventory(coal=27), Position(x=-12.5, y=30.5))
+11: ('boiler', EntityStatus.WORKING, Inventory(coal=13))
+
+=== 2026-11-03T17:27:29 [scripts\37_iron_drills.py] reward=-1
+﻿def place_drills(resource, count, chest=False):
+    ref = nearest(resource)
+    bb = get_resource_patch(resource, ref, radius=25).bounding_box
+    placed = 0
+    xs = [bb.left_top.x + 2 + 4 * i for i in range(int((bb.right_bottom.x - bb.left_top.x) // 4))]
+    ys = [bb.left_top.y + 2 + 4 * j for j in range(int((bb.right_bottom.y - bb.left_top.y) // 4))]
+    for yy in ys:
+        for xx in xs:
+            if placed >= count:
+                return placed
+            pos = Position(x=xx, y=yy)
+            try:
+                go(Position(x=xx, y=yy + 3))
+                if not can_place_entity(Prototype.BurnerMiningDrill, Direction.DOWN, pos):
+                    continue
+                d = place_entity(Prototype.BurnerMiningDrill, direction=Direction.DOWN, position=pos)
+                d = insert_item(Prototype.Coal, d, quantity=4)
+                if chest:
+                    place_entity(Prototype.WoodenChest, position=d.drop_position)
+                else:
+                    f = place_entity(Prototype.StoneFurnace, position=d.drop_position)
+                    insert_item(Prototype.Coal, f, quantity=3)
+                placed += 1
+            except Exception:
+                pass
+    return placed
+
+n = 5
+gather(Resource.Stone, 45)
+craft_item(Prototype.BurnerMiningDrill, quantity=n)
+craft_item(Prototype.StoneFurnace, quantity=n)
+print('placed', place_drills(Resource.IronOre, n))
+print(inspect_inventory())
+
+
+--- output
+invalid non-printable character U+FEFF
+
+=== 2026-11-03T17:27:56 [-c] reward=5693
+print(tend(), inspect_inventory())
+--- output
+1: ((68, 133), Inventory(transport-belt=8, small-electric-pole=5, pipe=16, stone-furnace=3, coal=43, iron-ore=5, iron-plate=217, copper-plate=194, iron-gear-wheel=4, copper-cable=28, electronic-circuit=8))
+
+=== 2026-11-03T17:28:37 [scripts\37_iron_drills.py] reward=6867
+def place_drills(resource, count, chest=False):
+    ref = nearest(resource)
+    bb = get_resource_patch(resource, ref, radius=25).bounding_box
+    placed = 0
+    xs = [bb.left_top.x + 2 + 4 * i for i in range(int((bb.right_bottom.x - bb.left_top.x) // 4))]
+    ys = [bb.left_top.y + 2 + 4 * j for j in range(int((bb.right_bottom.y - bb.left_top.y) // 4))]
+    for yy in ys:
+        for xx in xs:
+            if placed >= count:
+                return placed
+            pos = Position(x=xx, y=yy)
+            try:
+                go(Position(x=xx, y=yy + 3))
+                if not can_place_entity(Prototype.BurnerMiningDrill, Direction.DOWN, pos):
+                    continue
+                d = place_entity(Prototype.BurnerMiningDrill, direction=Direction.DOWN, position=pos)
+                d = insert_item(Prototype.Coal, d, quantity=4)
+                if chest:
+                    place_entity(Prototype.WoodenChest, position=d.drop_position)
+                else:
+                    f = place_entity(Prototype.StoneFurnace, position=d.drop_position)
+                    insert_item(Prototype.Coal, f, quantity=3)
+                placed += 1
+            except Exception:
+                pass
+    return placed
+
+n = 5
+gather(Resource.Stone, 45)
+craft_item(Prototype.BurnerMiningDrill, quantity=n)
+craft_item(Prototype.StoneFurnace, quantity=n)
+print('placed', place_drills(Resource.IronOre, n))
+print(inspect_inventory())
+
+
+--- output
+32: ('placed', 5)
+33: (Inventory(transport-belt=8, small-electric-pole=5, pipe=16, stone-furnace=2, coal=8, iron-ore=5, iron-plate=158, copper-plate=194, iron-gear-wheel=11, copper-cable=28, electronic-circuit=8),)
+
+=== 2026-11-03T17:29:35 [scripts\44_cycle.py] reward=8377
+PACK_CHEST = Position(x=-8.5, y=27.5)
+BOILER_CHEST = Position(x=-10.5, y=30.5)
+
+def feed_packs(n):
+    if inv(Prototype.IronPlate) < 2 * n + 60 or inv(Prototype.CopperPlate) < n + 20:
+        return 0
+    craft_item(Prototype.IronGearWheel, quantity=n)
+    craft_item(Prototype.AutomationSciencePack, quantity=n)
+    go(Position(x=PACK_CHEST.x + 2, y=PACK_CHEST.y + 2))
+    insert_item(Prototype.AutomationSciencePack, get_entity(Prototype.IronChest, PACK_CHEST), quantity=n)
+    return n
+
+def feed_boiler(reserve=15):
+    spare = inv(Prototype.Coal) - reserve
+    if spare > 0:
+        go(Position(x=BOILER_CHEST.x + 2, y=BOILER_CHEST.y + 2))
+        insert_item(Prototype.Coal, get_entity(Prototype.IronChest, BOILER_CHEST), quantity=spare)
+
+def cycle(packs=20):
+    k, p = tend()
+    feed_boiler()
+    n = feed_packs(packs)
+    i = inspect_inventory()
+    print('coal+%d plates+%d packs+%d | iron %d cu %d coal %d' % (k, p, n, i[Prototype.IronPlate], i[Prototype.CopperPlate], i[Prototype.Coal]))
+
+cycle()
+
+--- output
+26: ('coal+62 plates+175 packs+20 | iron 224 cu 243 coal 0',)
+
+=== 2026-11-03T17:30:23 [scripts\45_more_coal.py] reward=9200
+SERVICE_CHESTS = [(-8.5, 27.5), (-10.5, 30.5)]
+
+def collect_coal():
+    got = 0
+    for c in get_entities({Prototype.WoodenChest, Prototype.IronChest}):
+        if (c.position.x, c.position.y) in SERVICE_CHESTS:
+            continue
+        try:
+            n = c.inventory[Prototype.Coal]
+            if n:
+                near(c.position, 2)
+                got += extract_item(Prototype.Coal, c, quantity=n)
+        except Exception:
+            pass
+    return got
+
+def place_coal_drills(count):
+    ref = nearest(Resource.Coal)
+    bb = get_resource_patch(Resource.Coal, ref, radius=25).bounding_box
+    placed = 0
+    xs = [bb.left_top.x + 2 + 4 * i for i in range(int((bb.right_bottom.x - bb.left_top.x) // 4))]
+    ys = [bb.left_top.y + 2 + 4 * j for j in range(int((bb.right_bottom.y - bb.left_top.y) // 4))]
+    for yy in ys:
+        for xx in xs:
+            if placed >= count:
+                return placed
+            pos = Position(x=xx, y=yy)
+            try:
+                go(Position(x=xx, y=yy + 3))
+                if not can_place_entity(Prototype.BurnerMiningDrill, Direction.DOWN, pos):
+                    continue
+                d = place_entity(Prototype.BurnerMiningDrill, direction=Direction.DOWN, position=pos)
+                d = insert_item(Prototype.Coal, d, quantity=4)
+                place_entity(Prototype.IronChest, position=d.drop_position)
+                placed += 1
+            except Exception:
+                pass
+    return placed
+
+n = 4
+gather(Resource.Stone, 25)
+craft_item(Prototype.BurnerMiningDrill, quantity=n)
+craft_item(Prototype.IronChest, quantity=n)
+gather(Resource.Coal, 20)
+print('coal drills', place_coal_drills(n))
+print(inspect_inventory())
+
+--- output
+45: ('coal drills', 4)
+46: (Inventory(iron-chest=1, transport-belt=8, small-electric-pole=5, pipe=16, stone-furnace=2, coal=4, stone=5, iron-ore=5, iron-plate=176, copper-plate=243, iron-gear-wheel=1, copper-cable=28, electronic-circuit=8, automation-science-pack=15),)
+
+=== 2026-11-03T18:00:28 [-c] reward=-1
+
+for _ in range(4):
+    cycle(20)
+
+--- output
+3: ('coal+83 plates+285 packs+20 | iron 330 cu 314 coal 7',)
+
+Error: Evaluation timed out after 1800s
+
